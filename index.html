@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PT Exercise Tracker</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --panel:#ffffff;
+    --text:#18202a;
+    --muted:#64748b;
+    --line:#d9e1ec;
+    --shadow:0 10px 30px rgba(15, 23, 42, 0.08);
+    --radius:18px;
+    --today:#1f7ae0;
+    --success:#218838;
+    --warn:#d6a200;
+    --danger:#d64545;
+    --chip:#eaf0f8;
+    --focus:#7aa8ff;
+    --st:#60A8F0;
+    --str:#70D090;
+    --nerve:#D090F0;
+    --cardio:#F08060;
+    --decomp:#60D0E0;
+    --phase2:#F0D060;
+    --avoid:#E85A5A;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Verdana,system-ui,-apple-system,Segoe UI,sans-serif}
+  body{min-height:100vh}
+  header.app-header{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(180deg,rgba(245,247,251,.98),rgba(245,247,251,.92));
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(217,225,236,.8);
+    padding:14px 16px 10px;
+  }
+  .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .title-wrap h1{margin:0;font-size:1.25rem;line-height:1.1}
+  .title-wrap p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+  .status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);font-size:.88rem}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+  .dot.saved{background:var(--success)}
+  .dot.busy{background:var(--warn)}
+  nav.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 0}
+  .tab-btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--text);padding:11px 14px;border-radius:999px;cursor:pointer;min-height:44px;box-shadow:0 1px 0 rgba(255,255,255,.8) inset;font-weight:700;font-size:.93rem}
+  .tab-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+  main{padding:14px 16px 28px;max-width:1450px;margin:0 auto}
+  section.panel{display:none}
+  section.panel.active{display:block}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+  .card h2,.card h3,.card h4{margin:0 0 10px}
+  .subtle{color:var(--muted)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .spaced{justify-content:space-between}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:.82rem;font-weight:700}
+  .chip.warn{background:#fff0f0;border-color:#f2b6b6;color:var(--danger)}
+  .chip.stretch{background:rgba(96,168,240,.15);border-color:rgba(96,168,240,.35)}
+  .chip.strength{background:rgba(112,208,144,.15);border-color:rgba(112,208,144,.35)}
+  .chip.nerve{background:rgba(208,144,240,.15);border-color:rgba(208,144,240,.35)}
+  .chip.cardio{background:rgba(240,128,96,.15);border-color:rgba(240,128,96,.35)}
+  .chip.decompression{background:rgba(96,208,224,.18);border-color:rgba(96,208,224,.38)}
+  .chip.phase2{background:rgba(240,208,96,.28);border-color:rgba(240,208,96,.55)}
+  .chip.avoid{background:rgba(232,90,90,.15);border-color:rgba(232,90,90,.35)}
+  .section-title{margin:0 0 12px;font-size:1.02rem}
+  .btn{appearance:none;border:none;background:#243044;color:#fff;border-radius:12px;padding:11px 14px;cursor:pointer;min-height:44px;font-weight:700}
+  .btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
+  .btn.danger{background:var(--danger)}
+  .btn.small{padding:8px 10px;min-height:36px;font-size:.88rem;border-radius:10px}
+  .btn:focus,.tab-btn:focus,input:focus,select:focus,textarea:focus,summary:focus{outline:3px solid var(--focus);outline-offset:2px}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:#fff;color:var(--text)}
+  textarea{min-height:92px;resize:vertical}
+  label{display:block;font-size:.88rem;font-weight:700;margin:0 0 6px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .fields{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .fields.tight{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .muted{color:var(--muted)}
+  .today-head{display:grid;gap:10px;grid-template-columns:1fr auto}
+  .status-big{font-size:1.1rem;font-weight:800}
+  .routine-item{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff;margin-bottom:10px}
+  .routine-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+  .routine-name{font-weight:800;font-size:1rem}
+  .routine-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .set-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .set-box{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fafcff}
+  .set-box input{width:18px;height:18px;margin:0}
+  details.guide{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+  details.guide summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  details.guide summary::-webkit-details-marker{display:none}
+  details.guide .guide-body{padding:0 14px 14px}
+  .guide-body ul{margin:8px 0 0 20px;padding:0}
+  .guide-body li{margin:6px 0}
+  .library-search{position:sticky;top:90px;z-index:10;background:linear-gradient(180deg,var(--bg),rgba(245,247,251,.94));padding-bottom:10px}
+  .cat-group{margin-bottom:16px}
+  .exercise-card{padding:12px;border:1px solid var(--line);border-radius:16px;background:#fff;margin-bottom:10px}
+  .exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .exercise-head h4{margin:0}
+  .exercise-desc{margin:6px 0 0;color:var(--muted)}
+  .guide-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:10px}
+  .mini-box{background:#fafcff;border:1px solid var(--line);border-radius:14px;padding:10px}
+  .mini-box h5{margin:0 0 6px;font-size:.88rem}
+  .mini-box ul{margin:0 0 0 18px;padding:0}
+  .mini-box li{margin:4px 0}
+  .warning-banner{padding:10px 12px;border-radius:14px;background:#fff1f1;border:1px solid rgba(232,90,90,.35);color:#9b1c1c;font-weight:700}
+  .two-col{display:grid;gap:14px;grid-template-columns:1.15fr .85fr}
+  .form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  .helper{font-size:.82rem;color:var(--muted)}
+  .section-block{margin-bottom:18px}
+  .exercise-list{display:grid;gap:10px}
+  .routine-builder-item{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
+  .inline-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(13,20,31,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal-backdrop.open{display:flex}
+  .modal{width:min(1100px,100%);max-height:95vh;overflow:auto;background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.25);padding:16px}
+  .modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .modal-header h3{margin:0}
+  .calendar-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:12px}
+  .day-head,.day-cell{min-height:84px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px}
+  .day-head{min-height:auto;background:#eef3f8;font-weight:800;font-size:.82rem;text-align:center}
+  .day-cell{cursor:pointer}
+  .day-cell.empty{background:#f7f8fb;color:#a0a9b7;cursor:default}
+  .day-cell .date{font-weight:800;margin-bottom:6px}
+  .day-cell.full{background:rgba(33,136,56,.14);border-color:rgba(33,136,56,.3)}
+  .day-cell.partial{background:rgba(214,162,0,.18);border-color:rgba(214,162,0,.32)}
+  .day-cell.none{background:rgba(128,138,156,.10);border-color:rgba(128,138,156,.24)}
+  .stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
+  .stat .num{font-size:1.4rem;font-weight:900;margin-top:4px}
+  .selected-log{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:#fff}
+  .footer-note{color:var(--muted);font-size:.82rem;margin-top:8px}
+  .toast{position:fixed;right:16px;bottom:16px;z-index:80;background:#18202a;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.22s ease;pointer-events:none;max-width:min(92vw,420px)}
+  .toast.show{opacity:1;transform:translateY(0)}
+  @media (max-width: 900px){
+    .two-col{grid-template-columns:1fr}
+    .today-head{grid-template-columns:1fr}
+    .calendar-grid{gap:6px}
+    .day-head,.day-cell{min-height:70px;padding:7px}
+  }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="header-row">
+    <div class="title-wrap">
+      <h1>PT Exercise Tracker</h1>
+      <p>Offline-first single-file tracker for routines, exercise detail, logs, and CSV export.</p>
+    </div>
+    <div class="status-pill" aria-live="polite"><span id="savedDot" class="dot"></span><span id="savedText">Loading…</span></div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="today">Today</button>
+  <button class="tab-btn" data-tab="library">Library</button>
+  <button class="tab-btn" data-tab="edit">Edit</button>
+  <button class="tab-btn" data-tab="log">Log</button>
+</nav>
+
+<main>
+  <section id="todayPanel" class="panel active"></section>
+  <section id="libraryPanel" class="panel"></section>
+  <section id="editPanel" class="panel"></section>
+  <section id="logPanel" class="panel"></section>
+</main>
+
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <div>
+        <h3 id="modalTitle">Edit Exercise</h3>
+        <div class="helper">Use one item per line for the list fields.</div>
+      </div>
+      <button class="btn secondary small" id="closeModalBtn" type="button">Close</button>
+    </div>
+    <form id="exerciseModalForm">
+      <input type="hidden" name="id">
+      <div class="fields">
+        <div class="field">
+          <label for="modalName">Name</label>
+          <input id="modalName" name="name" required>
+        </div>
+        <div class="field">
+          <label for="modalCategory">Category</label>
+          <select id="modalCategory" name="category" required>
+            <option>Stretch</option>
+            <option>Strength</option>
+            <option>Nerve</option>
+            <option>Cardio</option>
+            <option>Decompression</option>
+            <option>Phase2</option>
+            <option>Avoid</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label for="modalDescription">Description</label>
+        <textarea id="modalDescription" name="description" required></textarea>
+      </div>
+      <div class="fields" style="margin-top:12px">
+        <div class="field">
+          <label for="modalWhat">What to Feel</label>
+          <textarea id="modalWhat" name="whatToFeel"></textarea>
+        </div>
+        <div class="field">
+          <label for="modalProgression">Progression</label>
+          <textarea id="modalProgression" name="progression"></textarea>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label for="modalNotes">Notes</label>
+        <textarea id="modalNotes" name="notes"></textarea>
+      </div>
+      <div class="fields" style="margin-top:12px">
+        <div class="field">
+          <label for="modalTechnique">Technique (one line per step)</label>
+          <textarea id="modalTechnique" name="technique"></textarea>
+        </div>
+        <div class="field">
+          <label for="modalMistakes">Common Mistakes (one line per item)</label>
+          <textarea id="modalMistakes" name="commonMistakes"></textarea>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label for="modalTags">Tags (comma separated)</label>
+        <input id="modalTags" name="tags">
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Update Exercise</button>
+        <button class="btn secondary" type="button" id="cancelModalBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+const STORAGE_KEY = 'pt-tracker-v1';
+const CATEGORY_META = {
+  Stretch:{label:'Stretch',cls:'stretch',color:'var(--st)'},
+  Strength:{label:'Strength',cls:'strength',color:'var(--str)'},
+  Nerve:{label:'Nerve',cls:'nerve',color:'var(--nerve)'},
+  Cardio:{label:'Cardio',cls:'cardio',color:'var(--cardio)'},
+  Decompression:{label:'Decompression',cls:'decompression',color:'var(--decomp)'},
+  Phase2:{label:'Phase 2',cls:'phase2',color:'var(--phase2)'},
+  Avoid:{label:'Avoid',cls:'avoid',color:'var(--avoid)'},
+};
+const BASE_EXERCISES = [{"id": "supine-piriformis-stretch", "name": "Supine Piriformis Stretch", "category": "Stretch", "description": "Controlled mobility work for supine piriformis stretch.", "tags": ["stretch", "mobility"]}, {"id": "knee-to-opposite-shoulder-stretch", "name": "Knee-to-Opposite-Shoulder Stretch", "category": "Stretch", "description": "Controlled mobility work for knee-to-opposite-shoulder stretch.", "tags": ["stretch", "mobility"]}, {"id": "pigeon-pose", "name": "Pigeon Pose", "category": "Stretch", "description": "Controlled mobility work for pigeon pose.", "tags": ["stretch"]}, {"id": "laying-down-figure-4-stretch", "name": "Laying Down Figure-4 Stretch", "category": "Stretch", "description": "Controlled mobility work for laying down figure-4 stretch.", "tags": ["stretch", "mobility"]}, {"id": "standing-figure-4", "name": "Standing Figure-4", "category": "Stretch", "description": "Controlled mobility work for standing figure-4.", "tags": ["stretch"]}, {"id": "hamstring-stretch", "name": "Hamstring Stretch", "category": "Stretch", "description": "Controlled mobility work for hamstring stretch.", "tags": ["stretch", "mobility"]}, {"id": "seated-piriformis-stretch", "name": "Seated Piriformis Stretch", "category": "Stretch", "description": "Controlled mobility work for seated piriformis stretch.", "tags": ["stretch", "mobility"]}, {"id": "standing-hip-flexor-stretch", "name": "Standing Hip Flexor Stretch", "category": "Stretch", "description": "Controlled mobility work for standing hip flexor stretch.", "tags": ["stretch", "mobility", "hips"]}, {"id": "butterfly-stretch", "name": "Butterfly Stretch", "category": "Stretch", "description": "Controlled mobility work for butterfly stretch.", "tags": ["stretch", "mobility"]}, {"id": "calf-stretch", "name": "Calf Stretch", "category": "Stretch", "description": "Controlled mobility work for calf stretch.", "tags": ["stretch", "mobility"]}, {"id": "fire-hydrants", "name": "Fire Hydrants", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "glute-bridges", "name": "Glute Bridges", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "clamshells", "name": "Clamshells", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "side-lying-hip-extension", "name": "Side-Lying Hip Extension", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "standing-band-hip-abduction", "name": "Standing Band Hip Abduction", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "ab-flexes-with-marching", "name": "Ab Flexes with Marching", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "core"]}, {"id": "standing-leg-lift-back", "name": "Standing Leg Lift Back", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "standing-leg-lift-corner", "name": "Standing Leg Lift Corner", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "push-ups", "name": "Push-ups", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "v-sit-sit-ups", "name": "V-Sit Sit-ups", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "nerve-flossing", "name": "Nerve Flossing", "category": "Nerve", "description": "Gentle neural mobility drill focused on symptom-friendly gliding.", "tags": ["nerve"]}, {"id": "stationary-bike", "name": "Stationary Bike", "category": "Cardio", "description": "Low-impact conditioning option used to build tolerance without extra spinal load.", "tags": ["cardio", "conditioning"]}, {"id": "walking", "name": "Walking", "category": "Cardio", "description": "Low-impact conditioning option used to build tolerance without extra spinal load.", "tags": ["cardio", "conditioning"]}, {"id": "heat-pack", "name": "Heat Pack", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "prone-lying", "name": "Prone Lying", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "sacro-wedgy", "name": "Sacro Wedgy", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "ice-pack", "name": "Ice Pack", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "tennis-ball-massage", "name": "Tennis Ball Massage", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "hip-thrusts", "name": "Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "hips"]}, {"id": "single-leg-hip-thrusts", "name": "Single-Leg Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral", "hips"]}, {"id": "single-leg-bridge", "name": "Single-Leg Bridge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "bulgarian-split-squat", "name": "Bulgarian Split Squat", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "step-ups", "name": "Step-Ups", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "curtsy-lunge", "name": "Curtsy Lunge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "forward-lunge", "name": "Forward Lunge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "goblet-squat", "name": "Goblet Squat", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "cable-pull-throughs", "name": "Cable Pull-Throughs", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "lateral-band-walks", "name": "Lateral Band Walks", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "single-leg-stance", "name": "Single-Leg Stance", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "single-leg-romanian-deadlifts", "name": "Single-Leg Romanian Deadlifts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "loaded-step-ups", "name": "Loaded Step-Ups", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "loaded-hip-thrusts", "name": "Loaded Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "hips"]}, {"id": "stair-climbing-with-load", "name": "Stair Climbing with Load", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "conditioning"]}, {"id": "sled-push", "name": "Sled Push", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "conditioning"]}, {"id": "deadlifts", "name": "Deadlifts (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "bent-over-rows", "name": "Bent-Over Rows (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "romanian-deadlifts", "name": "Romanian Deadlifts (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "good-mornings", "name": "Good Mornings (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "lateral-lunges", "name": "Lateral Lunges (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "abductor-adductor-machine", "name": "Abductor / Adductor Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "seated-leg-curl-machine", "name": "Seated Leg Curl Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "rowing-machine", "name": "Rowing Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "running-during-recovery", "name": "Running During Recovery (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "feet-straight-in-squats-lunges", "name": "Feet Straight in Squats/Lunges (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}];
+const SPECIAL_CUES = {"Ab Flexes with Marching": {"feel": "lower abs bracing, pelvis gently tucked, no low-back arch", "focus": "quiet pelvis and controlled marching", "steps": ["Lie on your back with knees bent and feet down.", "Exhale, tighten the lower abs, and flatten the low back slightly.", "Slowly march one knee up while the trunk stays still.", "Lower with control and alternate sides."], "mistakes": ["arching the low back", "holding the breath", "letting the pelvis rock", "pulling the knee too hard"], "progression": "Start with tiny marches, then increase range or add a pause only if the pelvis stays quiet.", "notes": "Think ribs down and zipper up. This is ab control, not hip-flexor racing."}, "Nerve Flossing": {"feel": "light glide or tension that releases quickly", "focus": "gentle sciatic nerve glide, not a hard stretch", "steps": ["Lie on your back and support the leg behind the knee.", "Extend the knee and ankle together in a smooth motion.", "Return both joints together to the relaxed position.", "Repeat gently without holding the end range."], "mistakes": ["forcing the end range", "bouncing or rushing", "holding a painful position", "chasing symptoms instead of calming them"], "progression": "Shorten the range first, then add reps only if symptoms stay calm.", "notes": "If tingling or pain lingers, the dose is too high."}, "Standing Leg Lift Back": {"feel": "glute squeeze on the lifting side with a quiet low back", "focus": "straight-back hip extension", "steps": ["Hold a chair for balance and stand tall.", "Brace lightly and keep the knee straight.", "Lift the leg straight back using the glute.", "Lower slowly without swinging."], "mistakes": ["arching the low back", "turning the toes out", "using momentum", "leaning through the trunk"], "progression": "Add a pause, slower lowering, or a light band after control is consistent.", "notes": "Small motion is fine. The glute should do the work, not the spine."}, "Standing Leg Lift Corner": {"feel": "upper/outer glute working on a diagonal line", "focus": "45-degree hip extension with pelvic control", "steps": ["Hold the chair lightly and square the pelvis.", "Lift the leg back and slightly out on a diagonal.", "Keep the knee straight and the trunk still.", "Lower with control and repeat."], "mistakes": ["side-bending", "twisting the pelvis open", "swinging the leg", "arching to fake range"], "progression": "Use a slower tempo or light resistance once the diagonal path stays clean.", "notes": "This bridges straight-back extension to more lateral hip control."}, "Laying Down Figure-4 Stretch": {"feel": "deep buttock stretch without knee pain", "focus": "piriformis/outer-hip stretch on the floor", "steps": ["Lie on your back with both knees bent.", "Cross one ankle over the opposite thigh.", "Draw the supporting thigh toward your chest.", "Breathe and release if the knee pinches."], "mistakes": ["forcing the knee toward the chest", "twisting the pelvis", "pulling on the knee joint", "bouncing"], "progression": "Increase hold time first, then move a little deeper only if it stays comfortable.", "notes": "Gentle pressure is enough."}, "Calf Stretch": {"feel": "steady stretch through the calf or Achilles region", "focus": "wall stretch or toe-elevated variation", "steps": ["Stand facing a wall with the target leg behind you.", "Keep the heel down and drive the back leg gently back.", "Use a straight knee for the upper calf and a bent knee for the deeper soleus.", "Hold and breathe without letting the foot twist."], "mistakes": ["lifting the heel", "turning the toes out", "forcing sharp Achilles pain", "leaning through the low back"], "progression": "Hold longer first, then increase the lean slightly if the stretch remains comfortable.", "notes": "Books under the toes are fine if that is part of the setup."}, "Push-ups": {"feel": "chest, triceps, shoulders, and core working together", "focus": "one long plank line from head to heels or knees", "steps": ["Set the hands under the shoulders and brace the trunk.", "Lower the body as one piece.", "Press the floor away and return to the top.", "Keep the neck long and the hips level."], "mistakes": ["sagging hips", "flaring the elbows hard", "cutting the range short", "craning the head forward"], "progression": "Use wall or incline push-ups first, then lower the angle as strength improves.", "notes": "A perfect incline rep beats a sloppy floor rep."}, "V-Sit Sit-ups": {"feel": "abdominals controlling a smooth roll back and rise", "focus": "controlled spinal flexion", "steps": ["Start tall and sit upright.", "Lean back until the lower back begins to round slightly.", "Use the abs to curl back up.", "Keep the motion smooth and controlled."], "mistakes": ["dropping too far back", "yanking with the neck", "using momentum", "turning it into a hip-flexor drill"], "progression": "Reduce range or bend the knees before adding a longer lever.", "notes": "Stop when control fades."}};
+const PHASE2_CUES = {"Hip Thrusts": ["strong glute squeeze at the top", "pause and keep ribs stacked", "arching the low back", "pause at lockout before adding load", "Load should amplify glute work, not change the pattern."], "Single-Leg Hip Thrusts": ["one glute lifting while pelvis stays level", "keep the pelvis square on the bench", "pelvis twisting or dropping", "add top holds before load", "This is a demanding unilateral progression."], "Single-Leg Bridge": ["glute and hamstring of the working leg", "keep the pelvis square and drive through the heel", "rotation or bouncing at the top", "master the two-leg bridge first", "The bridge pattern should come before the single-leg version."], "Bulgarian Split Squat": ["front leg quad and glute with an upright torso", "lower straight down and keep the front knee tracking well", "pushing off the rear leg", "start with split squat first", "Do not rush depth; control matters more than range."], "Step-Ups": ["the stepping leg driving the body upward", "place the whole foot and press through the step", "bouncing off the trailing leg", "progress step height slowly", "This is a strength plus coordination challenge."], "Curtsy Lunge": ["lateral hip and glute control on the front leg", "cross back only as far as alignment stays clean", "twisting or collapsing inward", "use a smaller crossover first", "Lateral control demand is higher here."], "Forward Lunge": ["front leg load with the torso stacked", "step to a controlled distance and keep the knee tracking well", "pushing off the back leg too much", "use split squats or reverse lunges first", "A clean lunge pattern should already be in place."], "Goblet Squat": ["legs and glutes under a braced trunk", "hold the weight close and keep the chest tall", "rounding or letting the weight drift forward", "use bodyweight or box squats first", "Depth is secondary to alignment."], "Cable Pull-Throughs": ["glutes and hamstrings loading through a hinge", "hinge at the hips and stand by driving them forward", "turning it into a squat", "practice the hinge unloaded first", "Good hinge mechanics make this valuable."], "Lateral Band Walks": ["side glutes stabilizing the pelvis", "keep band tension and take small controlled steps", "letting the feet drag together", "use a lighter band before more tension", "Useful for frontal-plane hip control."], "Single-Leg Stance": ["tripod foot and quiet pelvis", "hold balance with small corrections", "clawing the toes or locking the knee", "remove hand support first", "Balance basics protect the later loading."], "Single-Leg Romanian Deadlifts": ["hamstrings and glute lengthening then driving up", "hinge while the free leg reaches back", "opening the pelvis or rounding the back", "use a hand-supported hinge first", "Balance, hinge control, and unilateral strength come together here."], "Loaded Step-Ups": ["same step-up pattern with the trunk braced", "keep the load close and the step height manageable", "using a step that is too high", "progress from bodyweight to loaded", "External load raises balance demands."], "Loaded Hip Thrusts": ["heavier glute squeeze at the top", "keep the ribs down and pause before lowering", "hyperextending the low back", "add load only after bodyweight reps are crisp", "Load should not change the movement pattern."], "Stair Climbing with Load": ["conditioning and leg strength with organized posture", "step deliberately and keep the pelvis level", "moving too fast or stomping", "build duration first", "This is strength and work capacity together."], "Sled Push": ["full-body drive through the legs and trunk", "lean as one unit and take short powerful steps", "rounding the back or rushing the steps", "start with light load and short distances", "Great because it loads the legs without a deep hinge."]};
+const AVOID_CUES = {"Deadlifts (Avoid)": ["large hinge plus load can spike spinal shear and fatigue", "long lever and load close to the floor make compensation easy", "rounding or overextending the back", "use bridges, hip thrusts, or supported hinging first", "Reintroduce only later with PT approval."], "Bent-Over Rows (Avoid)": ["sustained hinge can fatigue the back and hips", "the torso must stay inclined while the arms row", "unsupported hinge drifting into rotation", "use supported rows instead", "This is usually too much hinge demand early on."], "Romanian Deadlifts (Avoid)": ["deep hinge and hamstring load can be too aggressive", "the spine must stay controlled through a long lever", "dropping too deep or rounding", "use cable pull-throughs or bridges first", "Later only, if hinge tolerance is excellent."], "Good Mornings (Avoid)": ["bar-on-back leverage magnifies spinal demand", "a small technique error becomes a big hinge load", "forcing depth or losing the brace", "use safer hinge patterns first", "Usually a later-stage strength move."], "Lateral Lunges (Avoid)": ["side-to-side loading can exceed current hip and knee tolerance", "the body must absorb a wide frontal-plane shift", "reaching too far or collapsing inward", "use split squats or step-ups first", "Reintroduce only when frontal-plane control is ready."], "Abductor / Adductor Machine (Avoid)": ["fixed machine paths can force uncomfortable end ranges", "load is often increased before active control is ready", "pushing hard into the stops", "use band walks or side-lying work instead", "Consider much later only if specifically prescribed."], "Seated Leg Curl Machine (Avoid)": ["isolated hamstring loading may be too much in this phase", "the seat can encourage compression or pelvic compensation", "forcing heavy reps or cramping through the set", "use bridge-based hamstring work first", "Only return if later programming needs it."], "Rowing Machine (Avoid)": ["repetitive catch position combines flexion and force", "the catch can aggravate a sensitive back or hip", "rounding into the catch", "use bike or walking instead", "Reintroduce only after prolonged hinging is tolerated."], "Running During Recovery (Avoid)": ["repetitive impact may keep tissues irritated", "fatigue changes mechanics quickly", "returning to speed or distance too fast", "use walking or bike cardio first", "Only resume with a deliberate phase progression."], "Feet Straight in Squats/Lunges (Avoid)": ["forcing feet dead straight can block natural hip mechanics", "anatomy often needs a small natural turnout", "knees tracking against the feet", "use a comfortable natural stance", "This is usually a coaching cue, not a hard rule."]};
+
+const todayISO = () => new Date().toLocaleDateString('en-CA');
+const pad = n => String(n).padStart(2,'0');
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const splitLines = text => String(text ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+const csvEscape = v => {
+  const s = String(v ?? '');
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+};
+const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const isoFromDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseIso = iso => {
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y, m-1, d);
+};
+const endOfMonth = d => new Date(d.getFullYear(), d.getMonth()+1, 0);
+
+let state = loadState();
+let ui = { activeTab:'today', search:'', monthOffset:0, selectedLogDate:todayISO(), editingId:null };
+
+init();
+
+function init(){
+  ensureLibrarySeed();
+  ensureTodayRoutine();
+  wireTabs();
+  wireGlobalControls();
+  renderAll();
+  setSaved(true, 'Ready');
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return {
+        exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
+        routines: parsed.routines && typeof parsed.routines === 'object' ? parsed.routines : {},
+        settings: parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : { lastSync:null, version:1 }
+      };
+    }
+  }catch(err){}
+  return { exercises:[], routines:{}, settings:{ lastSync:null, version:1 } };
+}
+
+function buildGenericGuide(name, category){
+  const niceName = name.replace(/\s+\(Avoid\)$/,'');
+  const base = {
+    Stretch:{
+      whatToFeel:`A calm, moderate stretch in the target area from ${niceName}.`,
+      technique:['Set up slowly and breathe normally.','Move only until you feel tension, then stop before pain.','Hold the position without bouncing or twisting.','Come out with control.'],
+      commonMistakes:['forcing range','holding the breath','twisting the pelvis or spine'],
+      progression:'Increase hold time first, then range only if the stretch stays comfortable.',
+      notes:'A good stretch should feel local and controlled.'
+    },
+    Strength:{
+      whatToFeel:`${niceName} should turn on the target muscles with stable joints and a controlled tempo.`,
+      technique:['Set the position and brace lightly.','Move slowly enough to avoid swinging or momentum.','Pause where the target muscles should work hardest.','Return with the same control you used on the way out.'],
+      commonMistakes:['using momentum','arching the low back','letting knees or pelvis drift'],
+      progression:'Add a pause, slow the tempo, increase range, or add light resistance as form stays consistent.',
+      notes:'Quality reps matter more than hitting a rep count.'
+    },
+    Nerve:{
+      whatToFeel:'A light glide or release, not a hard stretch, burn, or symptom flare.',
+      technique:['Move slowly and keep the range small at first.','Coordinate the joints so the nerve glides rather than clamps.','Repeat smoothly without holding the end range.','Back off if symptoms intensify or linger.'],
+      commonMistakes:['treating it like a hard stretch','holding the end range','pushing into symptom flare'],
+      progression:'Shorten the range before increasing it, and keep the dose easy.',
+      notes:'Nerve work should settle quickly after the set.'
+    },
+    Cardio:{
+      whatToFeel:'A gradual rise in heart rate and breathing without a symptom flare.',
+      technique:['Start easier than you think you need to.','Use a pace you can sustain with smooth mechanics.','Keep the trunk relaxed and the movement steady.','Cool down gently.'],
+      commonMistakes:['starting too hard','slouching','ignoring symptom changes'],
+      progression:'Increase time first, then intensity only if the next day feels okay.',
+      notes:'Cardio should support recovery, not create a hangover.'
+    },
+    Decompression:{
+      whatToFeel:'Less pressure, less guarding, and a sense of support or relief.',
+      technique:['Set up so the target area can relax.','Breathe slowly and let the muscles soften.','Use the position or tool without forcing a deep stretch.','Come out gradually and note the response.'],
+      commonMistakes:['turning it into an aggressive stretch','staying in a painful position','overdoing intensity'],
+      progression:'Add time or a small range change only when the position is clearly relieving.',
+      notes:'Decompression is often best before or after active work.'
+    },
+    Phase2:{
+      whatToFeel:`A stronger but controlled training stimulus in ${niceName}. This is a Phase 2 exercise and requires prior Phase 1 mastery.`,
+      technique:['Set the load or body position so the first reps are repeatable.','Brace the trunk and keep the pelvis and ribs organized.','Move through the range you can control without twisting, bouncing, or collapsing.','Finish each rep in the same alignment you started with.'],
+      commonMistakes:['adding load before the pattern is stable','letting the low back take over','rushing the tempo'],
+      progression:'Progress one variable at a time: reps, range, load, or complexity.',
+      notes:'Do not progress if pain, compensation, or next-day flare-ups increase.'
+    },
+    Avoid:{
+      whatToFeel:`This pattern can create too much hinge, shear, compression, or fatigue for recovery right now. ${niceName} is listed as an avoid exercise.`,
+      technique:['The main issue is the loading pattern itself: a large hinge, held spine, or aggressive lever can shift stress to irritated tissues.','As the set gets hard, compensation usually increases and the movement stops being clean.','That is why this pattern stays out of the early program.'],
+      commonMistakes:['treating it like a normal strengthening exercise','adding load too soon','ignoring symptom changes'],
+      progression:'Use a safer substitute first, such as bridges, supported squats, step-ups, or other Phase 1/2 patterns.',
+      notes:'Reintroduce only later and only if the PT specifically wants it back.'
+    }
+  };
+  return base[category];
+}
+
+function buildGuide(name, category){
+  const cue = SPECIAL_CUES[name];
+  if(cue){
+    return { whatToFeel: cue.feel, technique: cue.steps, commonMistakes: cue.mistakes, progression: cue.progression, notes: cue.notes };
+  }
+  if(category === 'Phase2'){
+    const p = PHASE2_CUES[name];
+    return {
+      whatToFeel: `${name} should feel like ${p.feel}. This is a Phase 2 exercise and requires prior Phase 1 mastery.`,
+      technique: ['Set up so the first reps are controlled and repeatable.', p.step, 'Stop before trunk, pelvis, or knees drift out of position.', 'Reset and repeat with the same shape.'],
+      commonMistakes: [p.bad, 'adding load before form is ready','rushing the tempo or using momentum'],
+      progression: `${p.progression}.`,
+      notes: `Phase 2 exercise. ${p.notes}`
+    };
+  }
+  if(category === 'Avoid'){
+    const a = AVOID_CUES[name];
+    return {
+      whatToFeel: `${name} tends to create ${a.feel}.`,
+      technique: [a.step1, a.step2, 'The movement often becomes less clean as fatigue rises, which is why it is not used now.'],
+      commonMistakes: [a.bad, 'treating the movement as harmless just because it feels familiar','ignoring symptoms during or after the session'],
+      progression: a.progression,
+      notes: a.notes
+    };
+  }
+  return buildGenericGuide(name, category);
+}
+
+function enrichExercises(list){
+  return list.map(ex => ({ ...ex, drillDown: ex.drillDown || buildGuide(ex.name, ex.category) }));
+}
+
+function ensureLibrarySeed(){
+  const seeded = enrichExercises(BASE_EXERCISES);
+  if(!Array.isArray(state.exercises) || !state.exercises.length){
+    state.exercises = seeded;
+    persist(false);
+    return;
+  }
+  const seededById = new Map(seeded.map(ex => [ex.id, ex]));
+  state.exercises = state.exercises.map(ex => {
+    const seed = seededById.get(ex.id);
+    return { ...ex, drillDown: ex.drillDown || seed?.drillDown || buildGuide(ex.name, ex.category) };
+  });
+}
+
+function ensureTodayRoutine(){
+  const d = todayISO();
+  if(!state.routines[d]){
+    state.routines[d] = { id:`routine-${d}`, date:d, exercises:[], completionStatus:'none', notes:'' };
+    persist(false);
+  }
+  normalizeAllRoutines();
+}
+
+function normalizeAllRoutines(){
+  Object.keys(state.routines).forEach(date => {
+    const routine = state.routines[date];
+    if(!routine || typeof routine !== 'object'){ delete state.routines[date]; return; }
+    routine.id = routine.id || `routine-${date}`;
+    routine.date = routine.date || date;
+    routine.exercises = Array.isArray(routine.exercises) ? routine.exercises.map(normalizeRoutineExercise) : [];
+    routine.notes = typeof routine.notes === 'string' ? routine.notes : '';
+    routine.completionStatus = computeCompletionStatus(routine);
+  });
+}
+
+function normalizeRoutineExercise(ex){
+  const sets = Math.max(1, Number(ex.sets || 1));
+  const completed = Array.from({length:sets}, (_, i) => Boolean(ex.completed && ex.completed[i]));
+  return {
+    exerciseId: ex.exerciseId,
+    sets,
+    reps: Math.max(0, Number(ex.reps || 0)),
+    holdDuration: Math.max(0, Number(ex.holdDuration || 0)),
+    holdRep: ex.holdRep === null || ex.holdRep === '' || Number.isNaN(Number(ex.holdRep)) ? null : Number(ex.holdRep),
+    completed
+  };
+}
+
+function computeCompletionStatus(routine){
+  if(!routine || !routine.exercises || !routine.exercises.length) return 'none';
+  const total = routine.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
+  const done = routine.exercises.reduce((sum, ex) => sum + (ex.completed || []).filter(Boolean).length, 0);
+  if(done === 0) return 'none';
+  if(done === total) return 'full';
+  return 'partial';
+}
+
+function persist(showToast = true){
+  try{
+    normalizeAllRoutines();
+    state.settings = state.settings || {};
+    state.settings.lastSync = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setSaved(true, 'Saved');
+    if(showToast) toast('Saved');
+  }catch(err){
+    setSaved(false, 'Save failed');
+    toast('Storage is full or unavailable. Please clear logs or free space.', true);
+  }
+}
+
+function setSaved(ok, message){
+  const dot = document.getElementById('savedDot');
+  const text = document.getElementById('savedText');
+  dot.className = `dot ${ok ? 'saved' : 'busy'}`;
+  text.textContent = message;
+}
+
+function toast(msg, isError=false){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = isError ? '#9b1c1c' : '#18202a';
+  el.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+function wireTabs(){
+  document.getElementById('tabs').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab-btn');
+    if(!btn) return;
+    ui.activeTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`${ui.activeTab}Panel`).classList.add('active');
+    renderActive();
+  });
+}
+
+function wireGlobalControls(){
+  document.getElementById('todayPanel').addEventListener('change', onTodayChange);
+  document.getElementById('editPanel').addEventListener('input', onEditInput);
+  document.getElementById('editPanel').addEventListener('change', onEditChange);
+  document.getElementById('editPanel').addEventListener('submit', onEditSubmit);
+  document.getElementById('libraryPanel').addEventListener('input', onLibrarySearch);
+  document.getElementById('logPanel').addEventListener('click', onLogClick);
+  document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id === 'modalBackdrop') closeModal(); });
+  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+  document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+  document.getElementById('exerciseModalForm').addEventListener('submit', onModalSubmit);
+}
+
+function renderAll(){ renderToday(); renderLibrary(); renderEdit(); renderLog(); updateTabBadge(); }
+function renderActive(){
+  if(ui.activeTab === 'today') renderToday();
+  else if(ui.activeTab === 'library') renderLibrary();
+  else if(ui.activeTab === 'edit') renderEdit();
+  else if(ui.activeTab === 'log') renderLog();
+  updateTabBadge();
+}
+
+function getExerciseById(id){ return state.exercises.find(ex => ex.id === id); }
+function getRoutine(date){
+  if(!state.routines[date]) state.routines[date] = { id:`routine-${date}`, date, exercises:[], completionStatus:'none', notes:'' };
+  const r = state.routines[date];
+  r.exercises = Array.isArray(r.exercises) ? r.exercises.map(normalizeRoutineExercise) : [];
+  r.completionStatus = computeCompletionStatus(r);
+  return r;
+}
+
+function renderToday(){
+  const panel = document.getElementById('todayPanel');
+  const date = todayISO();
+  const routine = getRoutine(date);
+  const totalSets = routine.exercises.reduce((s, ex) => s + ex.sets, 0);
+  const completedSets = routine.exercises.reduce((s, ex) => s + (ex.completed || []).filter(Boolean).length, 0);
+  const status = routine.completionStatus;
+  const statusLabel = status === 'full' ? 'Full completion' : status === 'partial' ? 'Partial completion' : 'No completion yet';
+  const statusColor = status === 'full' ? 'success' : status === 'partial' ? 'warn' : 'muted';
+
+  const routineHtml = routine.exercises.length ? routine.exercises.map((entry) => {
+    const ex = getExerciseById(entry.exerciseId);
+    const guide = ex?.drillDown || buildGuide(ex?.name || '', ex?.category || 'Strength');
+    const holdText = entry.holdDuration > 0 ? `${entry.holdDuration}-second hold${entry.holdRep ? ` on rep ${entry.holdRep}` : ''}` : '';
+    return `
+      <div class="routine-item">
+        <div class="routine-top">
+          <div>
+            <div class="routine-name">${escapeHtml(ex ? ex.name : 'Unknown exercise')}</div>
+            <div class="routine-meta">
+              <span class="chip ${ex ? CATEGORY_META[ex.category].cls : ''}">${escapeHtml(ex ? CATEGORY_META[ex.category].label : 'Exercise')}</span>
+              <span class="chip">${entry.sets} × ${entry.reps || 0}</span>
+              ${holdText ? `<span class="chip">${escapeHtml(holdText)}</span>` : ''}
+            </div>
+          </div>
+          <button class="btn secondary small" type="button" data-today-guide="${escapeHtml(entry.exerciseId)}">Guide</button>
+        </div>
+        <div class="set-row">
+          ${Array.from({length: entry.sets}, (_, i) => `
+            <label class="set-box">
+              <input type="checkbox" data-today-date="${date}" data-exercise-id="${entry.exerciseId}" data-set-index="${i}" ${entry.completed[i] ? 'checked' : ''}>
+              <span>Set ${i+1}</span>
+            </label>
+          `).join('')}
+        </div>
+        <div id="todayGuide-${entry.exerciseId}" style="display:none;margin-top:10px">${buildGuideHtml(guide)}</div>
+      </div>
+    `;
+  }).join('') : `<div class="card"><p class="subtle">No exercises are in today's routine yet. Go to <strong>Edit</strong> to build one.</p></div>`;
+
+  panel.innerHTML = `
+    <div class="today-head">
+      <div class="card">
+        <h2 class="section-title">Today: ${date}</h2>
+        <div class="row" style="margin-bottom:10px">
+          <span class="chip ${statusColor}">${statusLabel}</span>
+          <span class="chip">${completedSets}/${totalSets || 0} sets completed today</span>
+        </div>
+        <div class="helper">Check each set in real time. Your routine saves automatically to localStorage.</div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">Quick Links</h3>
+        <div class="inline-actions">
+          <button class="btn secondary small" type="button" data-jump-tab="edit">Build Routine</button>
+          <button class="btn secondary small" type="button" data-jump-tab="library">Browse Library</button>
+          <button class="btn secondary small" type="button" data-jump-tab="log">View Log</button>
+        </div>
+      </div>
+    </div>
+    <div class="section-block" style="margin-top:14px">
+      <div class="card">
+        <div class="row spaced">
+          <h3 class="section-title">Today's Routine</h3>
+          <span class="chip">Auto-saved</span>
+        </div>
+        ${routineHtml}
+        <div class="footer-note">Summary: ${completedSets}/${totalSets || 0} sets completed today.</div>
+      </div>
+    </div>
+  `;
+}
+
+function buildGuideHtml(guide){
+  return `
+    <div class="guide-grid">
+      <div class="mini-box">
+        <h5>What to Feel</h5>
+        <div>${escapeHtml(guide.whatToFeel)}</div>
+      </div>
+      <div class="mini-box">
+        <h5>Technique</h5>
+        <ul>${guide.technique.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+      </div>
+      <div class="mini-box">
+        <h5>Common Mistakes</h5>
+        <ul>${guide.commonMistakes.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+      </div>
+      <div class="mini-box">
+        <h5>Progression</h5>
+        <div>${escapeHtml(guide.progression)}</div>
+      </div>
+      <div class="mini-box" style="grid-column:1/-1">
+        <h5>Notes</h5>
+        <div>${escapeHtml(guide.notes)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderLibrary(){
+  const panel = document.getElementById('libraryPanel');
+  const q = (ui.search || '').trim().toLowerCase();
+  const grouped = {};
+  state.exercises.forEach(ex => {
+    const blob = `${ex.name} ${ex.category} ${ex.description} ${(ex.tags || []).join(' ')}`.toLowerCase();
+    if(q && !blob.includes(q)) return;
+    (grouped[ex.category] ||= []).push(ex);
+  });
+  const groupsHtml = ['Stretch','Strength','Nerve','Cardio','Decompression','Phase2','Avoid'].map(cat => {
+    const items = grouped[cat] || [];
+    if(!items.length) return '';
+    return `
+      <div class="cat-group">
+        <div class="row spaced" style="margin-bottom:10px">
+          <h3 class="section-title">${cat === 'Phase2' ? 'Phase 2' : cat}</h3>
+          <span class="chip ${CATEGORY_META[cat].cls}">${items.length}</span>
+        </div>
+        ${items.map(ex => `
+          <div class="exercise-card">
+            <div class="exercise-head">
+              <div>
+                <h4>${escapeHtml(ex.name)}</h4>
+                <div class="row" style="margin-top:6px">
+                  <span class="chip ${CATEGORY_META[cat].cls}">${CATEGORY_META[cat].label}</span>
+                  ${cat === 'Avoid' ? `<span class="chip warn">Avoid during recovery</span>` : ''}
+                </div>
+              </div>
+              <button class="btn secondary small" type="button" data-library-toggle="${escapeHtml(ex.id)}">Toggle Guide</button>
+            </div>
+            <div class="exercise-desc">${escapeHtml(ex.description)}</div>
+            <div id="libGuideWrap-${ex.id}" style="display:none;margin-top:10px">${buildGuideHtml(ex.drillDown || buildGuide(ex.name, ex.category))}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+  panel.innerHTML = `
+    <div class="library-search">
+      <div class="card">
+        <div class="row spaced">
+          <div>
+            <h2 class="section-title">Library</h2>
+            <div class="subtle">Search by name, category, description, or tags.</div>
+          </div>
+          <span class="chip">${state.exercises.length} exercises</span>
+        </div>
+        <div style="margin-top:10px" class="field">
+          <label for="librarySearch">Search</label>
+          <input id="librarySearch" value="${escapeHtml(ui.search)}" placeholder="Try: glute, phase2, avoid, stretch">
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px">${groupsHtml || `<div class="card">No matches found.</div>`}</div>
+  `;
+}
+
+function renderEdit(){
+  const panel = document.getElementById('editPanel');
+  const date = todayISO();
+  const routine = getRoutine(date);
+  const selectOptions = state.exercises.map(ex => `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)} — ${ex.category}</option>`).join('');
+  const routineItems = routine.exercises.length ? routine.exercises.map((entry, idx) => {
+    const ex = getExerciseById(entry.exerciseId);
+    return `
+      <div class="routine-builder-item">
+        <div class="row spaced">
+          <div>
+            <div class="routine-name">${escapeHtml(ex ? ex.name : 'Unknown exercise')}</div>
+            <div class="routine-meta"><span class="chip ${ex ? CATEGORY_META[ex.category].cls : ''}">${escapeHtml(ex ? CATEGORY_META[ex.category].label : 'Exercise')}</span></div>
+          </div>
+          <button class="btn danger small" type="button" data-remove-routine="${idx}">Remove</button>
+        </div>
+        <div class="form-grid" style="margin-top:10px">
+          <div class="field">
+            <label>Sets</label>
+            <input type="number" min="1" step="1" data-routine-field="sets" data-index="${idx}" value="${entry.sets}">
+          </div>
+          <div class="field">
+            <label>Reps</label>
+            <input type="number" min="0" step="1" data-routine-field="reps" data-index="${idx}" value="${entry.reps}">
+          </div>
+          <div class="field">
+            <label>Has hold?</label>
+            <select data-routine-field="hasHold" data-index="${idx}">
+              <option value="no" ${entry.holdDuration > 0 ? '' : 'selected'}>No</option>
+              <option value="yes" ${entry.holdDuration > 0 ? 'selected' : ''}>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Hold duration (sec)</label>
+            <input type="number" min="0" step="1" data-routine-field="holdDuration" data-index="${idx}" value="${entry.holdDuration || 0}" ${entry.holdDuration > 0 ? '' : 'disabled'}>
+          </div>
+          <div class="field">
+            <label>Hold on rep</label>
+            <input type="number" min="1" step="1" data-routine-field="holdRep" data-index="${idx}" value="${entry.holdRep ?? ''}" ${entry.holdDuration > 0 ? '' : 'disabled'}>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') : `<div class="card"><p class="subtle">Today's routine is empty. Add exercises below, then save.</p></div>`;
+
+  const libraryCards = state.exercises.map(ex => `
+    <div class="exercise-card">
+      <div class="row spaced">
+        <div>
+          <h4>${escapeHtml(ex.name)}</h4>
+          <div class="row" style="margin-top:6px"><span class="chip ${CATEGORY_META[ex.category].cls}">${CATEGORY_META[ex.category].label}</span></div>
+          <div class="exercise-desc">${escapeHtml(ex.description)}</div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn secondary small" type="button" data-edit-ex="${escapeHtml(ex.id)}">Edit</button>
+          <button class="btn danger small" type="button" data-delete-ex="${escapeHtml(ex.id)}">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="two-col">
+      <div class="card">
+        <div class="row spaced">
+          <div>
+            <h2 class="section-title">Routine Builder</h2>
+            <div class="subtle">Auto-saves as you edit today's routine.</div>
+          </div>
+          <button class="btn secondary small" type="button" data-save-routine>Save Routine</button>
+        </div>
+        <div class="section-block" style="margin-top:12px">
+          <div class="field">
+            <label for="addExerciseSelect">Add exercise from library</label>
+            <select id="addExerciseSelect">${selectOptions}</select>
+          </div>
+          <div class="form-actions">
+            <button class="btn" type="button" data-add-to-routine>Add to today's routine</button>
+          </div>
+        </div>
+        <div class="exercise-list" id="routineItems">${routineItems}</div>
+      </div>
+      <div class="card">
+        <h2 class="section-title">Library Manager</h2>
+        <div class="subtle">Edit, delete, or add exercises in the master library.</div>
+        <div class="section-block" style="margin-top:12px;max-height:600px;overflow:auto;padding-right:4px">
+          ${libraryCards}
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2 class="section-title">Add New Exercise to Library</h2>
+      <form id="addExerciseForm">
+        <input type="hidden" name="id" value="">
+        <div class="fields">
+          <div class="field">
+            <label>Name</label>
+            <input name="name" required>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select name="category" required>
+              <option>Stretch</option>
+              <option>Strength</option>
+              <option>Nerve</option>
+              <option>Cardio</option>
+              <option>Decompression</option>
+              <option>Phase2</option>
+              <option>Avoid</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>Description</label>
+          <textarea name="description" required></textarea>
+        </div>
+        <div class="fields" style="margin-top:12px">
+          <div class="field">
+            <label>What to Feel</label>
+            <textarea name="whatToFeel"></textarea>
+          </div>
+          <div class="field">
+            <label>Progression</label>
+            <textarea name="progression"></textarea>
+          </div>
+        </div>
+        <div class="fields" style="margin-top:12px">
+          <div class="field">
+            <label>Technique (one item per line)</label>
+            <textarea name="technique"></textarea>
+          </div>
+          <div class="field">
+            <label>Common Mistakes (one item per line)</label>
+            <textarea name="commonMistakes"></textarea>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>Notes</label>
+          <textarea name="notes"></textarea>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>Tags (comma separated)</label>
+          <input name="tags">
+        </div>
+        <div class="form-actions">
+          <button class="btn" type="submit">Add to Library</button>
+          <span class="helper">Library edits save instantly.</span>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function renderLog(){
+  const panel = document.getElementById('logPanel');
+  const current = new Date();
+  current.setMonth(current.getMonth() + ui.monthOffset);
+  const y = current.getFullYear();
+  const m = current.getMonth();
+  const first = new Date(y, m, 1);
+  const last = endOfMonth(current);
+  const monthName = current.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+  const weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const startPad = first.getDay();
+  const days = [];
+  for(let i=0; i<startPad; i++) days.push(null);
+  for(let d=1; d<=last.getDate(); d++) days.push(new Date(y, m, d));
+  while(days.length % 7 !== 0) days.push(undefined);
+  const routines = Object.values(state.routines).filter(r => r.date.startsWith(`${y}-${pad(m+1)}`));
+  const stats = routines.reduce((acc, r) => { if(r.completionStatus === 'full') acc.full++; else if(r.completionStatus === 'partial') acc.partial++; else acc.none++; return acc; }, {full:0, partial:0, none:0});
+  const streak = calcStreak();
+  const selected = state.routines[ui.selectedLogDate];
+
+  panel.innerHTML = `
+    <div class="card">
+      <div class="calendar-toolbar">
+        <div>
+          <h2 class="section-title">Log — ${monthName}</h2>
+          <div class="subtle">Track routine completion, review past days, and export everything as CSV.</div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn secondary small" type="button" data-month-nav="-1">Previous</button>
+          <button class="btn secondary small" type="button" data-month-nav="0">Current</button>
+          <button class="btn secondary small" type="button" data-month-nav="1">Next</button>
+          <button class="btn small" type="button" data-export-csv>Export Log as CSV</button>
+        </div>
+      </div>
+
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><div class="muted">Full completion</div><div class="num">${stats.full}</div></div>
+        <div class="stat"><div class="muted">Partial completion</div><div class="num">${stats.partial}</div></div>
+        <div class="stat"><div class="muted">No completion</div><div class="num">${stats.none}</div></div>
+        <div class="stat"><div class="muted">Current streak</div><div class="num">${streak}</div></div>
+      </div>
+
+      <div class="calendar-grid" aria-label="Monthly calendar" style="margin-top:14px">
+        ${weekdays.map(w => `<div class="day-head">${w}</div>`).join('')}
+        ${days.map(d => {
+          if(d === null || d === undefined) return `<div class="day-cell empty"></div>`;
+          const iso = isoFromDate(d);
+          const routine = state.routines[iso];
+          let cls = 'empty';
+          let body = '';
+          if(routine){
+            cls = routine.completionStatus || 'none';
+            body = `<div class="muted">${routine.completionStatus === 'full' ? 'Full' : routine.completionStatus === 'partial' ? 'Partial' : 'None'}</div>`;
+          }else{
+            body = `<div class="muted">No log</div>`;
+          }
+          const selectedClass = ui.selectedLogDate === iso ? 'style="outline:3px solid var(--focus);outline-offset:1px"' : '';
+          return `
+            <div class="day-cell ${cls}" data-day="${iso}" ${selectedClass}>
+              <div class="date">${d.getDate()}</div>
+              ${body}
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="selected-log">
+        <div class="row spaced">
+          <h3 class="section-title">Selected Day: ${escapeHtml(ui.selectedLogDate)}</h3>
+          <span class="chip">${selected ? selected.completionStatus : 'No log'}</span>
+        </div>
+        ${selected ? renderSelectedLog(selected) : `<div class="subtle">No routine was logged for this date.</div>`}
+      </div>
+
+      <div class="section-block" style="margin-top:14px">
+        <h3 class="section-title">Clear Old Logs</h3>
+        <div class="row">
+          <div style="min-width:220px" class="field">
+            <label for="monthsToKeep">Keep last N months</label>
+            <input id="monthsToKeep" type="number" min="1" step="1" value="6">
+          </div>
+          <button class="btn danger" type="button" data-clear-logs>Clear Old Logs</button>
+        </div>
+        <div class="footer-note">This keeps the most recent months and removes older logged days from localStorage.</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSelectedLog(routine){
+  const lines = routine.exercises.map(entry => {
+    const ex = getExerciseById(entry.exerciseId);
+    const done = (entry.completed || []).filter(Boolean).length;
+    const total = entry.sets || 0;
+    return `
+      <li style="margin-bottom:10px">
+        <strong>${escapeHtml(ex ? ex.name : 'Unknown exercise')}</strong>
+        <div class="muted">${total} sets, ${entry.reps || 0} reps${entry.holdDuration ? `, ${entry.holdDuration}s hold${entry.holdRep ? ` on rep ${entry.holdRep}` : ''}` : ''} — ${done}/${total} sets completed</div>
+      </li>
+    `;
+  }).join('');
+  return `
+    <div class="row" style="margin-bottom:8px">
+      <span class="chip ${routine.completionStatus === 'full' ? 'stretch' : routine.completionStatus === 'partial' ? 'phase2' : 'avoid'}">${routine.completionStatus}</span>
+      <span class="chip">${routine.exercises.length} exercises</span>
+    </div>
+    <ul style="margin:0 0 0 18px;padding:0">${lines || '<li>No exercises in this routine.</li>'}</ul>
+    ${routine.notes ? `<div style="margin-top:10px"><strong>Notes:</strong> ${escapeHtml(routine.notes)}</div>` : ''}
+  `;
+}
+
+function calcStreak(){
+  let count = 0;
+  let d = new Date();
+  while(true){
+    const iso = isoFromDate(d);
+    const r = state.routines[iso];
+    if(r && r.completionStatus === 'full') count++;
+    else break;
+    d.setDate(d.getDate()-1);
+  }
+  return count;
+}
+
+function onTodayChange(e){
+  const cb = e.target.closest('input[type="checkbox"][data-today-date]');
+  if(!cb) return;
+  const date = cb.dataset.todayDate;
+  const routine = getRoutine(date);
+  const exId = cb.dataset.exerciseId;
+  const setIndex = Number(cb.dataset.setIndex);
+  const item = routine.exercises.find(x => x.exerciseId === exId);
+  if(!item) return;
+  item.completed[setIndex] = cb.checked;
+  routine.completionStatus = computeCompletionStatus(routine);
+  persist(false);
+  renderToday();
+  renderLog();
+  updateTabBadge();
+}
+
+function onEditInput(e){}
+
+function onEditChange(e){
+  const field = e.target.closest('[data-routine-field]');
+  if(field){
+    const idx = Number(field.dataset.index);
+    const routine = getRoutine(todayISO());
+    const item = routine.exercises[idx];
+    if(!item) return;
+    const key = field.dataset.routineField;
+    if(key === 'sets'){
+      const newSets = Math.max(1, Number(field.value || 1));
+      const oldCompleted = item.completed || [];
+      item.sets = newSets;
+      item.completed = Array.from({length:newSets}, (_, i) => Boolean(oldCompleted[i]));
+    }else if(key === 'reps'){
+      item.reps = Math.max(0, Number(field.value || 0));
+    }else if(key === 'hasHold'){
+      if(field.value === 'yes'){
+        if(!item.holdDuration) item.holdDuration = 30;
+        if(item.holdRep == null) item.holdRep = item.reps || 1;
+      }else{
+        item.holdDuration = 0;
+        item.holdRep = null;
+      }
+    }else if(key === 'holdDuration'){
+      item.holdDuration = Math.max(0, Number(field.value || 0));
+    }else if(key === 'holdRep'){
+      const v = Number(field.value);
+      item.holdRep = Number.isFinite(v) && v > 0 ? v : null;
+    }
+    routine.completionStatus = computeCompletionStatus(routine);
+    persist(false);
+    renderEdit();
+    renderToday();
+    updateTabBadge();
+  }
+}
+
+function onEditSubmit(e){
+  const form = e.target.closest('#addExerciseForm');
+  if(!form) return;
+  e.preventDefault();
+  const ex = readExerciseForm(form);
+  if(!ex.name.trim()) return toast('Name is required.', true);
+  if(!ex.category) return toast('Category is required.', true);
+  if(!ex.description.trim()) return toast('Description is required.', true);
+  const existsIdx = state.exercises.findIndex(x => x.id === ex.id);
+  if(existsIdx >= 0){
+    state.exercises[existsIdx] = ex;
+    toast('Exercise updated');
+  }else{
+    state.exercises.unshift(ex);
+    toast('Exercise added');
+  }
+  persist(false);
+  form.reset();
+  renderAll();
+}
+
+function onLibrarySearch(e){
+  if(e.target.id === 'librarySearch'){
+    ui.search = e.target.value;
+    renderLibrary();
+  }
+}
+
+function onLogClick(e){
+  const day = e.target.closest('[data-day]');
+  if(day){
+    ui.selectedLogDate = day.dataset.day;
+    renderLog();
+    return;
+  }
+  const nav = e.target.closest('[data-month-nav]');
+  if(nav){
+    const val = Number(nav.dataset.monthNav);
+    ui.monthOffset = val === 0 ? 0 : ui.monthOffset + val;
+    renderLog();
+    return;
+  }
+  if(e.target.closest('[data-export-csv]')){ exportCsv(); return; }
+  if(e.target.closest('[data-clear-logs]')){ clearOldLogs(); return; }
+}
+
+function clearOldLogs(){
+  const months = Math.max(1, Number(document.getElementById('monthsToKeep').value || 6));
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - months);
+  const cutoffIso = isoFromDate(cutoff);
+  let removed = 0;
+  Object.keys(state.routines).forEach(date => {
+    if(date < cutoffIso){ delete state.routines[date]; removed++; }
+  });
+  persist(false);
+  toast(`Removed ${removed} old log day(s).`);
+  renderLog();
+}
+
+function exportCsv(){
+  const rows = [['Date','Exercise','Category','Sets','Reps','Hold Duration (sec)','Hold Rep','Completed Sets','Completion Status','Notes']];
+  Object.values(state.routines).sort((a,b) => a.date.localeCompare(b.date)).forEach(routine => {
+    (routine.exercises || []).forEach(entry => {
+      const ex = getExerciseById(entry.exerciseId) || {};
+      const done = (entry.completed || []).filter(Boolean).length;
+      rows.push([
+        routine.date,
+        ex.name || 'Unknown exercise',
+        ex.category || '',
+        entry.sets || 0,
+        entry.reps || 0,
+        entry.holdDuration || 0,
+        entry.holdRep == null ? '' : entry.holdRep,
+        `${done}/${entry.sets || 0}`,
+        routine.completionStatus || computeCompletionStatus(routine),
+        routine.notes || ''
+      ]);
+    });
+  });
+  const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pt-exercise-log-${todayISO()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  toast('CSV exported');
+}
+
+function onModalSubmit(e){
+  e.preventDefault();
+  const form = e.currentTarget;
+  const ex = readExerciseForm(form);
+  if(!ex.name.trim()) return toast('Name is required.', true);
+  if(!ex.category) return toast('Category is required.', true);
+  if(!ex.description.trim()) return toast('Description is required.', true);
+  const existingIdx = state.exercises.findIndex(x => x.id === ex.id);
+  if(existingIdx >= 0){
+    state.exercises[existingIdx] = ex;
+    toast('Exercise updated');
+  }else{
+    state.exercises.unshift(ex);
+    toast('Exercise added');
+  }
+  persist(false);
+  closeModal();
+  renderAll();
+}
+
+function readExerciseForm(form){
+  const data = new FormData(form);
+  const name = String(data.get('name') || '').trim();
+  const id = String(data.get('id') || '').trim() || slugify(name);
+  const category = String(data.get('category') || 'Strength');
+  const description = String(data.get('description') || '').trim();
+  const drillDown = {
+    whatToFeel: String(data.get('whatToFeel') || '').trim(),
+    technique: splitLines(data.get('technique')),
+    commonMistakes: splitLines(data.get('commonMistakes')),
+    progression: String(data.get('progression') || '').trim(),
+    notes: String(data.get('notes') || '').trim()
+  };
+  const tags = String(data.get('tags') || '').split(',').map(s => s.trim()).filter(Boolean);
+  return { id, name, category, description, drillDown, tags };
+}
+
+function openModal(exerciseId){
+  const ex = exerciseId ? state.exercises.find(x => x.id === exerciseId) : null;
+  ui.editingId = ex ? ex.id : null;
+  const form = document.getElementById('exerciseModalForm');
+  form.reset();
+  document.getElementById('modalTitle').textContent = ex ? 'Edit Exercise' : 'Add Exercise';
+  form.elements.id.value = ex ? ex.id : '';
+  form.elements.name.value = ex ? ex.name : '';
+  form.elements.category.value = ex ? ex.category : 'Strength';
+  form.elements.description.value = ex ? ex.description : '';
+  form.elements.whatToFeel.value = ex?.drillDown?.whatToFeel || '';
+  form.elements.technique.value = ex?.drillDown?.technique?.join('\n') || '';
+  form.elements.commonMistakes.value = ex?.drillDown?.commonMistakes?.join('\n') || '';
+  form.elements.progression.value = ex?.drillDown?.progression || '';
+  form.elements.notes.value = ex?.drillDown?.notes || '';
+  form.elements.tags.value = ex?.tags?.join(', ') || '';
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.getElementById('modalBackdrop').setAttribute('aria-hidden','false');
+  document.getElementById('modalName').focus();
+}
+
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.getElementById('modalBackdrop').setAttribute('aria-hidden','true');
+}
+
+function onAddToRoutine(){
+  const select = document.getElementById('addExerciseSelect');
+  const exId = select.value;
+  const routine = getRoutine(todayISO());
+  if(routine.exercises.some(x => x.exerciseId === exId)) return toast("That exercise is already in today's routine.");
+  routine.exercises.push({ exerciseId: exId, sets:3, reps:10, holdDuration:0, holdRep:null, completed:[false,false,false] });
+  routine.completionStatus = computeCompletionStatus(routine);
+  persist(false);
+  toast("Added to today's routine");
+  renderEdit();
+  renderToday();
+  updateTabBadge();
+}
+
+function onSaveRoutine(){
+  const routine = getRoutine(todayISO());
+  if(!routine.exercises.length) return toast('Add at least one exercise before saving.', true);
+  persist(true);
+  toast('Routine saved');
+}
+
+function onEditPanelClick(e){
+  const rem = e.target.closest('[data-remove-routine]');
+  if(rem){
+    const idx = Number(rem.dataset.removeRoutine);
+    const routine = getRoutine(todayISO());
+    routine.exercises.splice(idx,1);
+    routine.completionStatus = computeCompletionStatus(routine);
+    persist(false);
+    renderEdit();
+    renderToday();
+    updateTabBadge();
+    return;
+  }
+  const editBtn = e.target.closest('[data-edit-ex]');
+  if(editBtn){ openModal(editBtn.dataset.editEx); return; }
+  const delBtn = e.target.closest('[data-delete-ex]');
+  if(delBtn){
+    const id = delBtn.dataset.deleteEx;
+    const ex = state.exercises.find(x => x.id === id);
+    if(!confirm(`Delete "${ex?.name || 'this exercise'}" from the library?`)) return;
+    state.exercises = state.exercises.filter(x => x.id !== id);
+    Object.values(state.routines).forEach(r => {
+      r.exercises = r.exercises.filter(item => item.exerciseId !== id);
+      r.completionStatus = computeCompletionStatus(r);
+    });
+    persist(false);
+    toast('Exercise deleted');
+    renderAll();
+    updateTabBadge();
+    return;
+  }
+  if(e.target.closest('[data-add-to-routine]')){ onAddToRoutine(); return; }
+  if(e.target.closest('[data-save-routine]')){ onSaveRoutine(); return; }
+}
+
+function onLibraryPanelClick(e){
+  const toggle = e.target.closest('[data-library-toggle]');
+  if(!toggle) return;
+  const id = toggle.dataset.libraryToggle;
+  const wrap = document.getElementById(`libGuideWrap-${id}`);
+  if(wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+document.getElementById('editPanel').addEventListener('click', onEditPanelClick);
+document.getElementById('libraryPanel').addEventListener('click', onLibraryPanelClick);
+document.getElementById('todayPanel').addEventListener('click', (e)=>{
+  const jump = e.target.closest('[data-jump-tab]');
+  if(jump){
+    ui.activeTab = jump.dataset.jumpTab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === ui.activeTab));
+    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`${ui.activeTab}Panel`).classList.add('active');
+    renderActive();
+    return;
+  }
+  const guideBtn = e.target.closest('[data-today-guide]');
+  if(guideBtn){
+    const wrap = document.getElementById(`todayGuide-${guideBtn.dataset.todayGuide}`);
+    if(wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+function updateTabBadge(){
+  const today = getRoutine(todayISO());
+  const completed = (today.exercises || []).reduce((s, ex) => s + (ex.completed || []).filter(Boolean).length, 0);
+  const total = (today.exercises || []).reduce((s, ex) => s + (ex.sets || 0), 0);
+  const todayBtn = document.querySelector('.tab-btn[data-tab="today"]');
+  todayBtn.textContent = total ? `Today (${completed}/${total})` : 'Today';
+}
+updateTabBadge();
+</script>
+</body>
+</html>
