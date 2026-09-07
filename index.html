@@ -1,1424 +1,1158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PT Tracker v1.1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PT Exercise Tracker v1.7</title>
 <style>
-  :root{
-    --bg:#f5f3ff;
-    --panel:#ffffff;
-    --text:#20213a;
-    --muted:#667085;
-    --line:#ddd8f0;
-    --shadow:0 8px 22px rgba(61,42,120,.10);
-    --radius:14px;
-    --today:#6256d9;
-    --success:#159a6b;
-    --warn:#c58b13;
-    --danger:#d54a6a;
-    --chip:#f0edff;
-    --focus:#7a6ff0;
-    --st:#4d9ef5;
-    --str:#35b97d;
-    --nerve:#9a63e8;
-    --cardio:#f28b56;
-    --decomp:#31b9c7;
-    --phase2:#d2a92d;
-    --avoid:#dc5266;
-    --navy:#2c2859;
-    --purple:#6a5ae0;
-    --indigo:#4d5bd4;
-    --lavender:#efeafe;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Verdana,system-ui,-apple-system,Segoe UI,sans-serif}
-  body{min-height:100vh}
-  header.app-header{
-    position:sticky;top:0;z-index:20;
-    background:linear-gradient(180deg,rgba(245,247,251,.98),rgba(245,247,251,.92));
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid rgba(217,225,236,.8);
-    padding:10px 14px 8px;
-  }
-  .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-  .title-wrap h1{margin:0;font-size:1.12rem;line-height:1.1}
-  .title-wrap p{margin:4px 0 0;color:var(--muted);font-size:.78rem}
-  .status-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);font-size:.76rem}
-  .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
-  .dot.saved{background:var(--success)}
-  .dot.busy{background:var(--warn)}
-  nav.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 0}
-  .tab-btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;min-height:44px;box-shadow:0 1px 0 rgba(255,255,255,.8) inset;font-weight:700;font-size:.78rem}
-  .tab-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
-  main{padding:10px 14px 22px;max-width:1450px;margin:0 auto}
-  section.panel{display:none}
-  section.panel.active{display:block}
-  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:11px}
-  .card h2,.card h3,.card h4{margin:0 0 10px}
-  .subtle{color:var(--muted)}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .spaced{justify-content:space-between}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:.72rem;font-weight:700}
-  .chip.warn{background:#fff0f0;border-color:#f2b6b6;color:var(--danger)}
-  .chip.stretch{background:#e5f0ff;border-color:#9fc8fb;color:#245e9e}
-  .chip.strength{background:#e3f8ef;border-color:#9cd9be;color:#167552}
-  .chip.nerve{background:#efe4ff;border-color:#c4a4f1;color:#6a3fa1}
-  .chip.cardio{background:#fff0e7;border-color:#f3bea0;color:#9a4d23}
-  .chip.decompression{background:#e0f8fb;border-color:#9ddce4;color:#18727d}
-  .chip.phase2{background:#fff6d8;border-color:#e5cc73;color:#84640c}
-  .chip.avoid{background:#ffe8ed;border-color:#efa6b5;color:#a22f48}
-  .section-title{margin:0 0 12px;font-size:.9rem}
-  .btn{appearance:none;border:none;background:#243044;color:#fff;border-radius:12px;padding:8px 11px;cursor:pointer;min-height:40px;font-weight:700}
-  .btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
-  .btn.danger{background:var(--danger)}
-  .btn.small{padding:6px 9px;min-height:32px;font-size:.72rem;border-radius:10px}
-  .btn:focus,.tab-btn:focus,input:focus,select:focus,textarea:focus,summary:focus{outline:3px solid var(--focus);outline-offset:2px}
-  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font:inherit;background:#fff;color:var(--text)}
-  textarea{min-height:92px;resize:vertical}
-  label{display:block;font-size:.76rem;font-weight:700;margin:0 0 6px}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .fields{display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-  .fields.tight{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
-  .muted{color:var(--muted)}
-  .today-head{display:grid;gap:10px;grid-template-columns:1fr auto}
-  .status-big{font-size:.95rem;font-weight:800}
-  .routine-item{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fff;margin-bottom:10px}
-  .routine-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
-  .routine-name{font-weight:800;font-size:.9rem}
-  .routine-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .set-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .set-box{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fafcff}
-  .set-box input{width:18px;height:18px;margin:0}
-  details.guide{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
-  details.guide summary{list-style:none;cursor:pointer;padding:9px 11px;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:10px}
-  details.guide summary::-webkit-details-marker{display:none}
-  details.guide .guide-body{padding:0 11px 11px}
-  .guide-body ul{margin:8px 0 0 20px;padding:0}
-  .guide-body li{margin:6px 0}
-  .library-search{position:sticky;top:90px;z-index:10;background:linear-gradient(180deg,var(--bg),rgba(245,247,251,.94));padding-bottom:10px}
-  .cat-group{margin-bottom:16px}
-  .exercise-card{padding:9px;border:1px solid var(--line);border-radius:16px;background:#fff;margin-bottom:10px}
-  .exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
-  .exercise-head h4{margin:0}
-  .exercise-desc{margin:6px 0 0;color:var(--muted)}
-  .guide-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:10px}
-  .mini-box{background:#fafcff;border:1px solid var(--line);border-radius:14px;padding:10px}
-  .mini-box h5{margin:0 0 6px;font-size:.76rem}
-  .mini-box ul{margin:0 0 0 18px;padding:0}
-  .mini-box li{margin:4px 0}
-  .warning-banner{padding:8px 10px;border-radius:12px;background:#fff1f1;border:1px solid rgba(232,90,90,.35);color:#9b1c1c;font-weight:700}
-  .two-col{display:grid;gap:14px;grid-template-columns:1.15fr .85fr}
-  .form-grid{display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-  .form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-  .helper{font-size:.72rem;color:var(--muted)}
-  .section-block{margin-bottom:18px}
-  .exercise-list{display:grid;gap:10px}
-  .routine-builder-item{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fff}
-  .inline-actions{display:flex;gap:8px;flex-wrap:wrap}
-  .modal-backdrop{position:fixed;inset:0;background:rgba(13,20,31,.5);display:none;align-items:center;justify-content:center;padding:12px;z-index:50}
-  .modal-backdrop.open{display:flex}
-  .modal{width:min(1100px,100%);max-height:95vh;overflow:auto;background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.25);padding:12px}
-  .library-manager-modal{width:min(980px,100%);}
-  .library-manager-list{max-height:48vh;overflow:auto;padding-right:4px;}
-  .library-manager-item{padding:10px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:rgba(255,255,255,.035);}
-  .library-manager-divider{height:1px;background:var(--line);margin:14px 0;}
-  .modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
-  .modal-header h3{margin:0}
-  .calendar-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-  .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:12px}
-  .day-head,.day-cell{min-height:84px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px}
-  .day-head{min-height:auto;background:#eef3f8;font-weight:800;font-size:.72rem;text-align:center}
-  .day-cell{cursor:pointer}
-  .day-cell.empty{background:#f7f8fb;color:#a0a9b7;cursor:default}
-  .day-cell .date{font-weight:800;margin-bottom:6px}
-  .day-cell.full{background:rgba(33,136,56,.14);border-color:rgba(33,136,56,.3)}
-  .day-cell.partial{background:rgba(214,162,0,.18);border-color:rgba(214,162,0,.32)}
-  .day-cell.none{background:rgba(128,138,156,.10);border-color:rgba(128,138,156,.24)}
-  .stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
-  .stat .num{font-size:1.15rem;font-weight:900;margin-top:4px}
-  .selected-log{margin-top:12px;padding:9px;border:1px solid var(--line);border-radius:16px;background:#fff}
-  .footer-note{color:var(--muted);font-size:.72rem;margin-top:8px}
-  .toast{position:fixed;right:16px;bottom:16px;z-index:80;background:#18202a;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.22s ease;pointer-events:none;max-width:min(92vw,420px)}
-  .toast.show{opacity:1;transform:translateY(0)}
-  @media (max-width: 900px){
-    .two-col{grid-template-columns:1fr}
-    .today-head{grid-template-columns:1fr}
-    .calendar-grid{gap:6px}
-    .day-head,.day-cell{min-height:70px;padding:7px}
-  }
+/* --- PT Tracker v1.7: Solid Background, Unified Purple Accents & Cleaned Header --- */
+:root {
+  --bg: #1a1628;
+  --panel: #252037;
+  --text: #f4f1fc;
+  --muted: #ded8ec;
+  --line: rgba(255,255,255,.14);
+  --shadow: 0 14px 34px rgba(9,7,18,.35);
+  --chip: #342c4b;
+  --focus: #a894ff;
+  --purple-primary: #7562e0;
+  --purple-hover: #6350cd;
+  --danger-bg: #c94f68;
+}
 
-  header.app-header{background:linear-gradient(135deg,rgba(238,234,255,.96),rgba(243,248,255,.95));border-bottom-color:#d6cff2}
-  .title-wrap h1{color:var(--navy)}
-  nav.tabs .tab-btn{background:linear-gradient(180deg,#ffffff,#f5f2ff);border-color:#d7d0f0;color:#45406d}
-  nav.tabs .tab-btn.active{background:linear-gradient(135deg,var(--purple),var(--indigo));border-color:transparent;color:#fff;box-shadow:0 6px 14px rgba(86,73,201,.22)}
-  .btn{background:linear-gradient(135deg,var(--purple),var(--indigo));box-shadow:0 4px 10px rgba(83,73,200,.16)}
-  .btn.secondary{background:#f7f5ff;color:#49416f;border-color:#d9d3f0;box-shadow:none}
-  .btn.danger{background:linear-gradient(135deg,#d64c68,#bd3d5b)}
-  .card,.routine-item,.routine-builder-item,.exercise-card,.selected-log,.stat,.modal{box-shadow:var(--shadow)}
-  .card{background:linear-gradient(180deg,#fff,#fcfbff)}
-  .routine-item{border-left:3px solid var(--purple)}
-  .routine-builder-item{border-left:3px solid var(--indigo)}
-  .exercise-card{border-left:3px solid var(--indigo)}
-  .set-box{padding:6px 8px;background:#f8f7ff;border-color:#d9d5ee}
-  .set-box input{width:16px;height:16px}
-  .mini-box{background:linear-gradient(180deg,#faf9ff,#f4f7ff);padding:9px}
-  .today-head .card:first-child{background:linear-gradient(135deg,#f2edff,#eef6ff)}
-  .status-pill{background:rgba(255,255,255,.86)}
-  .day-head{background:#eeeaff;color:#4b446f}
-  .day-cell.full{background:rgba(21,154,107,.14);border-color:rgba(21,154,107,.3)}
-  .day-cell.partial{background:rgba(210,169,45,.18);border-color:rgba(210,169,45,.32)}
-  .day-cell.none{background:rgba(154,99,232,.08);border-color:rgba(154,99,232,.16)}
+html, body {
+  background: #1a1628;
+  color: var(--text);
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
 
-  /* --- Refined dark / editorial visual treatment --- */
-  :root{
-    --bg:#211d31;
-    --panel:#2a263d;
-    --text:#eeeaff;
-    --muted:#a9a2bd;
-    --line:rgba(255,255,255,.10);
-    --shadow:0 14px 34px rgba(9,7,18,.24);
-    --chip:#332d49;
-    --focus:#9a82ff;
-    --navy:#f0ebff;
-  }
-  html,body{background:radial-gradient(circle at 15% 0%,#342750 0,#211d31 38%,#1d1a2a 100%);color:var(--text);}
-  body{font-size:14px;}
-  header.app-header{background:linear-gradient(180deg,rgba(35,30,52,.96),rgba(35,30,52,.84));border-bottom-color:rgba(255,255,255,.08);}
-  .title-wrap h1{font-family:Georgia,'Times New Roman',serif;color:#f2ecff;font-size:1.3rem;letter-spacing:.2px;}
-  .title-wrap p{color:#aaa2bc;}
-  .status-pill{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.11);box-shadow:none;color:#d8d2e8;}
-  nav.tabs{padding-top:9px;}
-  nav.tabs .tab-btn{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);color:#c8c1d9;box-shadow:none;}
-  nav.tabs .tab-btn.active{background:linear-gradient(135deg,#7662e8,#5f71dc);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(96,88,220,.22);}
-  .card,.routine-item,.routine-builder-item,.exercise-card,.selected-log,.stat,.modal{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.028));border-color:rgba(255,255,255,.10);box-shadow:var(--shadow);}
-  .card h2,.card h3,.card h4,.section-title,.routine-name,.exercise-head h4{font-family:Georgia,'Times New Roman',serif;color:#f0eaff;}
-  .subtle,.muted,.helper,.footer-note,.exercise-desc{color:#aaa2bc;}
-  .chip{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.11);color:#d8d2e8;}
-  .chip.warn{background:rgba(220,82,102,.13);border-color:rgba(220,82,102,.38);color:#ff9bad;}
-  .btn{background:linear-gradient(135deg,#7764e7,#5f72dc);box-shadow:0 7px 16px rgba(96,88,220,.20);}
-  .btn.secondary{background:rgba(255,255,255,.055);color:#e6e1f0;border-color:rgba(255,255,255,.12);}
-  .btn.danger{background:linear-gradient(135deg,#c94f68,#a93c56);}
-  input,select,textarea{background:rgba(255,255,255,.045);color:#f0edf7;border-color:rgba(255,255,255,.12);}
-  input::placeholder,textarea::placeholder{color:#857e99;}
-  label{color:#d9d3e4;}
-  .today-head .card:first-child{background:linear-gradient(135deg,rgba(125,102,231,.18),rgba(83,119,222,.16));}
-  .routine-item{border-left-color:#8170eb;}
-  .routine-builder-item{border-left-color:#5f72dc;}
-  .exercise-card{border-left-color:#6e68d9;}
-  .set-box{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12);color:#ddd7e9;}
-  .set-box input{accent-color:#7f6ee8;}
-  details.guide,.mini-box{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.10);}
-  details.guide summary{color:#ece7f5;}
-  .guide-body,.mini-box{color:#c4bdd0;}
-  .library-search{background:linear-gradient(180deg,rgba(33,29,49,.98),rgba(33,29,49,.90));}
-  .day-head{background:rgba(255,255,255,.055);color:#d7d0e5;border-color:rgba(255,255,255,.10);}
-  .day-cell,.day-cell.empty{background:rgba(255,255,255,.032);color:#a79fb7;border-color:rgba(255,255,255,.10);}
-  .day-cell.full{background:rgba(21,154,107,.14);border-color:rgba(91,220,163,.28);}
-  .day-cell.partial{background:rgba(210,169,45,.13);border-color:rgba(239,206,104,.28);}
-  .day-cell.none{background:rgba(154,99,232,.07);border-color:rgba(154,99,232,.16);}
-  .modal-backdrop{background:rgba(8,7,15,.78);}
-  /* Modal panes intentionally opaque so underlying Library content cannot bleed through. */
-  .modal{background:#17152a !important; color:#f0ebff; border-color:rgba(255,255,255,.12);}
-  .modal .card,.modal .library-manager-item{background:#211d38 !important; border-color:rgba(255,255,255,.11);}
-  .modal input,.modal select,.modal textarea{background:#11101f !important; color:#f0edf7; border-color:rgba(255,255,255,.14);}
-  .modal .subtle,.modal .helper{color:#aaa2bc;}
-  .toast{background:#171322;color:#f7f3ff;border:1px solid rgba(255,255,255,.08);}
-  .cat-group{padding:2px 0;}
-  .section-title{letter-spacing:.15px;}
+body {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header.app-header {
+  background: #252037;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  padding: 16px;
+  border-radius: 12px 12px 0 0;
+}
+
+.title-wrap h1 {
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  color: #ffffff;
+  font-size: 1.35rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+nav.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+nav.tabs .tab-btn {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+nav.tabs .tab-btn.active {
+  background: var(--purple-primary);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(117,98,224,.3);
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+.card, .routine-item, .routine-builder-item, .exercise-card, .selected-log, .stat, .modal {
+  background: #252037;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+h2, h3, h4, .section-title, .routine-name, .exercise-head h4 {
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+.subtle, .muted, .helper, .footer-note, .exercise-desc {
+  color: var(--muted);
+}
+
+.btn {
+  background: var(--purple-primary);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: #ffffff;
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 7px 16px rgba(117,98,224,.28);
+}
+
+.btn:hover {
+  background: var(--purple-hover);
+}
+
+.btn.secondary {
+  background: rgba(255,255,255,.075);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: none;
+}
+
+.btn.danger {
+  background: var(--danger-bg);
+  box-shadow: 0 7px 16px rgba(201,79,104,.28);
+}
+
+.btn.small {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+}
+
+input, select, textarea {
+  background: #1a1628;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 8px;
+  border-radius: 6px;
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #b5adc9;
+}
+
+label {
+  color: #f0ebff;
+  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.chip {
+  background: var(--chip);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #d8d2e8;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.routine-item { border-left: 4px solid var(--purple-primary); }
+.exercise-card { border-left: 4px solid #8e7ff2; }
+
+.set-box {
+  padding: 6px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  color: #ddd7e9;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.set-box input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--purple-primary);
+}
+
+.mini-box {
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.1);
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  background: #252037;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.stat .num {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day-head {
+  text-align: center;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 6px 0;
+  font-size: 0.85rem;
+}
+
+.day-cell {
+  background: rgba(255,255,255,.032);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  min-height: 65px;
+  padding: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.day-cell.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.day-cell .date {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.day-cell.full {
+  background: rgba(21,154,107,.14);
+  border-color: rgba(91,220,163,.28);
+}
+
+.day-cell.partial {
+  background: rgba(210,169,45,.13);
+  border-color: rgba(239,206,104,.28);
+}
+
+.day-cell.none {
+  background: rgba(154,99,232,.07);
+  border-color: rgba(154,99,232,.16);
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(8,7,15,.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal {
+  background: #17152a !important;
+  color: #f0ebff;
+  border: 1px solid rgba(255,255,255,.12);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #171322;
+  color: #f7f3ff;
+  border: 1px solid rgba(255,255,255,.15);
+  padding: 10px 16px;
+  border-radius: 8px;
+  z-index: 1100;
+  box-shadow: 0 10px 25px rgba(0,0,0,.4);
+  display: none;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.row.spaced {
+  justify-content: space-between;
+}
+
+.calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+details.guide {
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+details.guide summary {
+  color: #ece7f5;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.guide-body {
+  color: #c4bdd0;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
 </style>
 </head>
 <body>
-<header class="app-header">
-  <div class="header-row">
+
+  <header class="app-header">
     <div class="title-wrap">
-      <h1>PT Exercise Tracker</h1>
-      <p>Offline-first single-file tracker for routines, exercise detail, logs, and CSV export.</p>
+      <h1>PT Exercise Tracker v1.7</h1>
     </div>
-    <div class="status-pill" aria-live="polite"><span id="savedDot" class="dot"></span><span id="savedText">Loading…</span></div>
-  </div>
-</header>
+  </header>
+  
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" data-tab="builder" onclick="switchTab('builder')">Routine Builder</button>
+    <button class="tab-btn" data-tab="library" onclick="switchTab('library')">Library</button>
+    <button class="tab-btn" data-tab="log" onclick="switchTab('log')">Log</button>
+  </nav>
 
-<nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="today">Today</button>
-  <button class="tab-btn" data-tab="builder">Routine Builder</button>
-  <button class="tab-btn" data-tab="library">Library</button>
-  <button class="tab-btn" data-tab="log">Log</button>
-</nav>
-
-<main>
-  <section id="todayPanel" class="panel active"></section>
-  <section id="editPanel" class="panel"></section>
-  <section id="libraryPanel" class="panel"></section>
-  <section id="logPanel" class="panel"></section>
-</main>
-
-<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-header">
-      <div>
-        <h3 id="modalTitle">Edit Exercise</h3>
-        <div class="helper">Use one item per line for the list fields.</div>
+  <main>
+    <!-- Today Panel -->
+    <section id="todayPanel" class="panel active">
+      <div class="card">
+        <h2>Today's Routine</h2>
+        <p class="subtle">Select active routine, perform sets, and review guidance seamlessly.</p>
+        <div id="todayContent" style="margin-top: 14px;">Loading routine data...</div>
       </div>
-      <button class="btn secondary small" id="closeModalBtn" type="button">Close</button>
+    </section>
+
+    <!-- Routine Builder Panel -->
+    <section id="builderPanel" class="panel">
+      <div class="card">
+        <h2>Routine Builder</h2>
+        <p class="subtle">Create, rename, configure, or duplicate your physical therapy schedules[cite: 1].</p>
+        <div id="editPanel" style="margin-top: 14px;">Loading builder options...</div>
+      </div>
+    </section>
+
+    <!-- Library Panel -->
+    <section id="libraryPanel" class="panel">
+      <div class="card">
+        <h2>Exercise Library</h2>
+        <p class="subtle">Browse stretches, strength movements, and corrective protocols[cite: 1].</p>
+        <div id="libraryContent" style="margin-top: 14px;">Loading library...</div>
+      </div>
+    </section>
+
+    <!-- Log Panel -->
+    <section id="logPanel" class="panel">
+      <div id="logContent">Loading activity logs...</div>
+    </section>
+  </main>
+
+  <!-- Modals & Toasts -->
+  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal card">
+      <div class="row spaced" style="margin-bottom: 12px;">
+        <h3 id="modalTitle" class="section-title">Edit Exercise</h3>
+        <button class="btn secondary small" onclick="closeModal()">Close</button>
+      </div>
+      <form id="exerciseModalForm" onsubmit="onModalSubmit(event)">
+        <input type="hidden" name="id">
+        <div style="margin-bottom:10px;"><label>Name</label><input name="name" id="modalName" required></div>
+        <div style="margin-bottom:10px;"><label>Category</label><select name="category"><option>Strength</option><option>Stretching</option><option>Decompression</option><option>Avoid</option></select></div>
+        <div style="margin-bottom:10px;"><label>Description</label><textarea name="description" rows="2" required></textarea></div>
+        <div style="margin-bottom:10px;"><label>What to Feel</label><textarea name="whatToFeel" rows="2"></textarea></div>
+        <div style="margin-bottom:10px;"><label>Technique (one per line)</label><textarea name="technique" rows="3"></textarea></div>
+        <div style="margin-bottom:10px;"><label>Common Mistakes (one per line)</label><textarea name="commonMistakes" rows="3"></textarea></div>
+        <div style="margin-bottom:10px;"><label>Progression</label><textarea name="progression" rows="2"></textarea></div>
+        <div style="margin-bottom:10px;"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+        <div style="margin-bottom:14px;"><label>Tags (comma separated)</label><input name="tags"></div>
+        <div class="row" style="justify-content:flex-end;">
+          <button type="button" class="btn secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn">Save Exercise</button>
+        </div>
+      </form>
     </div>
-    <form id="exerciseModalForm">
-      <input type="hidden" name="id">
-      <div class="fields">
-        <div class="field">
-          <label for="modalName">Name</label>
-          <input id="modalName" name="name" required>
-        </div>
-        <div class="field">
-          <label for="modalCategory">Category</label>
-          <select id="modalCategory" name="category" required>
-            <option>Stretch</option>
-            <option>Strength</option>
-            <option>Decompression</option>
-            <option>Avoid</option>
-          </select>
-        </div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label for="modalDescription">Description</label>
-        <textarea id="modalDescription" name="description" required></textarea>
-      </div>
-      <div class="fields" style="margin-top:12px">
-        <div class="field">
-          <label for="modalWhat">What to Feel</label>
-          <textarea id="modalWhat" name="whatToFeel"></textarea>
-        </div>
-        <div class="field">
-          <label for="modalProgression">Progression</label>
-          <textarea id="modalProgression" name="progression"></textarea>
-        </div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label for="modalNotes">Notes</label>
-        <textarea id="modalNotes" name="notes"></textarea>
-      </div>
-      <div class="fields" style="margin-top:12px">
-        <div class="field">
-          <label for="modalTechnique">Technique (one line per step)</label>
-          <textarea id="modalTechnique" name="technique"></textarea>
-        </div>
-        <div class="field">
-          <label for="modalMistakes">Common Mistakes (one line per item)</label>
-          <textarea id="modalMistakes" name="commonMistakes"></textarea>
-        </div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label for="modalTags">Tags (comma separated)</label>
-        <input id="modalTags" name="tags">
-      </div>
-      <div class="form-actions">
-        <button class="btn" type="submit">Update Exercise</button>
-        <button class="btn secondary" type="button" id="cancelModalBtn">Cancel</button>
-      </div>
-    </form>
   </div>
-</div>
 
-<div id="libraryManagerBackdrop" class="modal-backdrop" aria-hidden="true">
-  <div class="modal library-manager-modal" role="dialog" aria-modal="true" aria-labelledby="libraryManagerTitle">
-    <div class="modal-header">
-      <div>
-        <h3 id="libraryManagerTitle">Manage Library</h3>
-        <div class="helper">Edit or remove exercises, or add a new exercise to the master library.</div>
-      </div>
-      <button class="btn secondary small" id="closeLibraryManagerBtn" type="button">Close</button>
-    </div>
-    <div id="libraryManagerContent"></div>
-  </div>
-</div>
+  <div id="toast" class="toast"></div>
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const STORAGE_KEY = 'pt_exercise_tracker_state_v1.7';
 
-<script>
-const STORAGE_KEY = 'pt-tracker-v1';
-const CATEGORY_ORDER = ['Stretch','Strength','Decompression','Avoid'];
-const CATEGORY_META = {
-  Stretch:{order:1,label:'1. Stretching',cls:'stretch',color:'var(--st)'},
-  Strength:{order:2,label:'2. Strength',cls:'strength',color:'var(--str)'},
-  Decompression:{order:3,label:'3. Decompression',cls:'decompression',color:'var(--decomp)'},
-  Avoid:{order:4,label:'4. Avoid',cls:'avoid',color:'var(--avoid)'}
-};
-const CATEGORY_MIGRATION = { Nerve:'Decompression', Phase2:'Strength', Cardio:null, Stretch:'Stretch', Strength:'Strength', Decompression:'Decompression', Avoid:'Avoid' };
-const BASE_EXERCISES = [{"id": "supine-piriformis-stretch", "name": "Supine Piriformis Stretch", "category": "Stretch", "description": "Controlled mobility work for supine piriformis stretch.", "tags": ["stretch", "mobility"]}, {"id": "knee-to-opposite-shoulder-stretch", "name": "Knee-to-Opposite-Shoulder Stretch", "category": "Stretch", "description": "Controlled mobility work for knee-to-opposite-shoulder stretch.", "tags": ["stretch", "mobility"]}, {"id": "pigeon-pose", "name": "Pigeon Pose", "category": "Stretch", "description": "Controlled mobility work for pigeon pose.", "tags": ["stretch"]}, {"id": "laying-down-figure-4-stretch", "name": "Laying Down Figure-4 Stretch", "category": "Stretch", "description": "Controlled mobility work for laying down figure-4 stretch.", "tags": ["stretch", "mobility"]}, {"id": "standing-figure-4", "name": "Standing Figure-4", "category": "Stretch", "description": "Controlled mobility work for standing figure-4.", "tags": ["stretch"]}, {"id": "hamstring-stretch", "name": "Hamstring Stretch", "category": "Stretch", "description": "Controlled mobility work for hamstring stretch.", "tags": ["stretch", "mobility"]}, {"id": "seated-piriformis-stretch", "name": "Seated Piriformis Stretch", "category": "Stretch", "description": "Controlled mobility work for seated piriformis stretch.", "tags": ["stretch", "mobility"]}, {"id": "standing-hip-flexor-stretch", "name": "Standing Hip Flexor Stretch", "category": "Stretch", "description": "Controlled mobility work for standing hip flexor stretch.", "tags": ["stretch", "mobility", "hips"]}, {"id": "butterfly-stretch", "name": "Butterfly Stretch", "category": "Stretch", "description": "Controlled mobility work for butterfly stretch.", "tags": ["stretch", "mobility"]}, {"id": "calf-stretch", "name": "Calf Stretch", "category": "Stretch", "description": "Controlled mobility work for calf stretch.", "tags": ["stretch", "mobility"]}, {"id": "fire-hydrants", "name": "Fire Hydrants", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "glute-bridges", "name": "Glute Bridges", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "clamshells", "name": "Clamshells", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "side-lying-hip-extension", "name": "Side-Lying Hip Extension", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "standing-band-hip-abduction", "name": "Standing Band Hip Abduction", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "hips"]}, {"id": "ab-flexes-with-marching", "name": "Ab Flexes with Marching", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength", "core"]}, {"id": "standing-leg-lift-back", "name": "Standing Leg Lift Back", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "standing-leg-lift-corner", "name": "Standing Leg Lift Corner", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "push-ups", "name": "Push-ups", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "v-sit-sit-ups", "name": "V-Sit Sit-ups", "category": "Strength", "description": "Activation or strengthening exercise for the hips, trunk, or upper body.", "tags": ["strength"]}, {"id": "dead-bugs", "name": "Dead Bugs", "category": "Strength", "description": "Supine core-control exercise using opposite arm and leg movements while maintaining stable spinal and pelvic alignment.", "tags": ["strength", "core", "stability"], "drillDown": {"whatToFeel": "A controlled abdominal effort and steady trunk as the opposite arm and leg move. You should feel the core working to keep the ribs, pelvis, and low back stable rather than feel the movement in the low back.", "technique": ["Lie on your back with hips and knees bent to about 90 degrees and arms reaching toward the ceiling.", "Set a comfortable neutral or gently supported spinal position and breathe normally while keeping the trunk quiet.", "Slowly lower one arm overhead while extending the opposite leg toward the floor, only as far as you can control without the low back arching or the pelvis shifting.", "Return to the starting position with control, then repeat on the opposite arm and leg.", "Keep the movement slow enough that the torso stays stable; regress the range or keep one or more limbs supported if alignment is difficult."], "commonMistakes": ["Letting the low back arch or the pelvis tip as the leg moves away.", "Moving the arms or legs farther than the trunk can control.", "Holding the breath or bracing so hard that normal breathing is lost.", "Rushing the alternating pattern and using momentum."], "progression": "Start with heel taps or one-limb-at-a-time variations. Progress to the opposite arm-and-leg pattern, then gradually increase the range of motion or add light resistance only when spinal and pelvic control remains consistent.", "notes": "Dead Bug is a supine counterpart to the bird dog: the limbs move while the trunk provides local stability. ACE recommends regressing the exercise until spinal alignment can be maintained and normal breathing can continue."}}, {"id": "nerve-flossing", "name": "Nerve Flossing", "category": "Nerve", "description": "Gentle neural mobility drill focused on symptom-friendly gliding.", "tags": ["nerve"]}, {"id": "stationary-bike", "name": "Stationary Bike", "category": "Cardio", "description": "Low-impact conditioning option used to build tolerance without extra spinal load.", "tags": ["cardio", "conditioning"]}, {"id": "walking", "name": "Walking", "category": "Cardio", "description": "Low-impact conditioning option used to build tolerance without extra spinal load.", "tags": ["cardio", "conditioning"]}, {"id": "heat-pack", "name": "Heat Pack", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "prone-lying", "name": "Prone Lying", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "sacro-wedgy", "name": "Sacro Wedgy", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "ice-pack", "name": "Ice Pack", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "tennis-ball-massage", "name": "Tennis Ball Massage", "category": "Decompression", "description": "Positioning or tool-based recovery option designed to reduce pressure and guarding.", "tags": ["decompression"]}, {"id": "hip-thrusts", "name": "Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "hips"]}, {"id": "single-leg-hip-thrusts", "name": "Single-Leg Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral", "hips"]}, {"id": "single-leg-bridge", "name": "Single-Leg Bridge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "bulgarian-split-squat", "name": "Bulgarian Split Squat", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "step-ups", "name": "Step-Ups", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "curtsy-lunge", "name": "Curtsy Lunge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "forward-lunge", "name": "Forward Lunge", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "goblet-squat", "name": "Goblet Squat", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "cable-pull-throughs", "name": "Cable Pull-Throughs", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "lateral-band-walks", "name": "Lateral Band Walks", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "single-leg-stance", "name": "Single-Leg Stance", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "single-leg-romanian-deadlifts", "name": "Single-Leg Romanian Deadlifts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "unilateral"]}, {"id": "loaded-step-ups", "name": "Loaded Step-Ups", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded"]}, {"id": "loaded-hip-thrusts", "name": "Loaded Hip Thrusts", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "hips"]}, {"id": "stair-climbing-with-load", "name": "Stair Climbing with Load", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "conditioning"]}, {"id": "sled-push", "name": "Sled Push", "category": "Phase2", "description": "Advanced strengthening and control exercise for later-stage rehabilitation.", "tags": ["phase2", "advanced", "loaded", "conditioning"]}, {"id": "deadlifts", "name": "Deadlifts (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "bent-over-rows", "name": "Bent-Over Rows (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "romanian-deadlifts", "name": "Romanian Deadlifts (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "good-mornings", "name": "Good Mornings (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "lateral-lunges", "name": "Lateral Lunges (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "abductor-adductor-machine", "name": "Abductor / Adductor Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "seated-leg-curl-machine", "name": "Seated Leg Curl Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "rowing-machine", "name": "Rowing Machine (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "running-during-recovery", "name": "Running During Recovery (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}, {"id": "feet-straight-in-squats-lunges", "name": "Feet Straight in Squats/Lunges (Avoid)", "category": "Avoid", "description": "Exercise to avoid during this recovery phase because it may overload sensitive tissues.", "tags": ["avoid", "caution"]}];
-const SPECIAL_CUES = {"Ab Flexes with Marching": {"feel": "lower abs bracing, pelvis gently tucked, no low-back arch", "focus": "quiet pelvis and controlled marching", "steps": ["Lie on your back with knees bent and feet down.", "Exhale, tighten the lower abs, and flatten the low back slightly.", "Slowly march one knee up while the trunk stays still.", "Lower with control and alternate sides."], "mistakes": ["arching the low back", "holding the breath", "letting the pelvis rock", "pulling the knee too hard"], "progression": "Start with tiny marches, then increase range or add a pause only if the pelvis stays quiet.", "notes": "Think ribs down and zipper up. This is ab control, not hip-flexor racing."}, "Nerve Flossing": {"feel": "light glide or tension that releases quickly", "focus": "gentle sciatic nerve glide, not a hard stretch", "steps": ["Lie on your back and support the leg behind the knee.", "Extend the knee and ankle together in a smooth motion.", "Return both joints together to the relaxed position.", "Repeat gently without holding the end range."], "mistakes": ["forcing the end range", "bouncing or rushing", "holding a painful position", "chasing symptoms instead of calming them"], "progression": "Shorten the range first, then add reps only if symptoms stay calm.", "notes": "If tingling or pain lingers, the dose is too high."}, "Standing Leg Lift Back": {"feel": "glute squeeze on the lifting side with a quiet low back", "focus": "straight-back hip extension", "steps": ["Hold a chair for balance and stand tall.", "Brace lightly and keep the knee straight.", "Lift the leg straight back using the glute.", "Lower slowly without swinging."], "mistakes": ["arching the low back", "turning the toes out", "using momentum", "leaning through the trunk"], "progression": "Add a pause, slower lowering, or a light band after control is consistent.", "notes": "Small motion is fine. The glute should do the work, not the spine."}, "Standing Leg Lift Corner": {"feel": "upper/outer glute working on a diagonal line", "focus": "45-degree hip extension with pelvic control", "steps": ["Hold the chair lightly and square the pelvis.", "Lift the leg back and slightly out on a diagonal.", "Keep the knee straight and the trunk still.", "Lower with control and repeat."], "mistakes": ["side-bending", "twisting the pelvis open", "swinging the leg", "arching to fake range"], "progression": "Use a slower tempo or light resistance once the diagonal path stays clean.", "notes": "This bridges straight-back extension to more lateral hip control."}, "Laying Down Figure-4 Stretch": {"feel": "deep buttock stretch without knee pain", "focus": "piriformis/outer-hip stretch on the floor", "steps": ["Lie on your back with both knees bent.", "Cross one ankle over the opposite thigh.", "Draw the supporting thigh toward your chest.", "Breathe and release if the knee pinches."], "mistakes": ["forcing the knee toward the chest", "twisting the pelvis", "pulling on the knee joint", "bouncing"], "progression": "Increase hold time first, then move a little deeper only if it stays comfortable.", "notes": "Gentle pressure is enough."}, "Calf Stretch": {"feel": "steady stretch through the calf or Achilles region", "focus": "wall stretch or toe-elevated variation", "steps": ["Stand facing a wall with the target leg behind you.", "Keep the heel down and drive the back leg gently back.", "Use a straight knee for the upper calf and a bent knee for the deeper soleus.", "Hold and breathe without letting the foot twist."], "mistakes": ["lifting the heel", "turning the toes out", "forcing sharp Achilles pain", "leaning through the low back"], "progression": "Hold longer first, then increase the lean slightly if the stretch remains comfortable.", "notes": "Books under the toes are fine if that is part of the setup."}, "Push-ups": {"feel": "chest, triceps, shoulders, and core working together", "focus": "one long plank line from head to heels or knees", "steps": ["Set the hands under the shoulders and brace the trunk.", "Lower the body as one piece.", "Press the floor away and return to the top.", "Keep the neck long and the hips level."], "mistakes": ["sagging hips", "flaring the elbows hard", "cutting the range short", "craning the head forward"], "progression": "Use wall or incline push-ups first, then lower the angle as strength improves.", "notes": "A perfect incline rep beats a sloppy floor rep."}, "V-Sit Sit-ups": {"feel": "abdominals controlling a smooth roll back and rise", "focus": "controlled spinal flexion", "steps": ["Start tall and sit upright.", "Lean back until the lower back begins to round slightly.", "Use the abs to curl back up.", "Keep the motion smooth and controlled."], "mistakes": ["dropping too far back", "yanking with the neck", "using momentum", "turning it into a hip-flexor drill"], "progression": "Reduce range or bend the knees before adding a longer lever.", "notes": "Stop when control fades."}};
-const PHASE2_CUES = {"Hip Thrusts": ["strong glute squeeze at the top", "pause and keep ribs stacked", "arching the low back", "pause at lockout before adding load", "Load should amplify glute work, not change the pattern."], "Single-Leg Hip Thrusts": ["one glute lifting while pelvis stays level", "keep the pelvis square on the bench", "pelvis twisting or dropping", "add top holds before load", "This is a demanding unilateral progression."], "Single-Leg Bridge": ["glute and hamstring of the working leg", "keep the pelvis square and drive through the heel", "rotation or bouncing at the top", "master the two-leg bridge first", "The bridge pattern should come before the single-leg version."], "Bulgarian Split Squat": ["front leg quad and glute with an upright torso", "lower straight down and keep the front knee tracking well", "pushing off the rear leg", "start with split squat first", "Do not rush depth; control matters more than range."], "Step-Ups": ["the stepping leg driving the body upward", "place the whole foot and press through the step", "bouncing off the trailing leg", "progress step height slowly", "This is a strength plus coordination challenge."], "Curtsy Lunge": ["lateral hip and glute control on the front leg", "cross back only as far as alignment stays clean", "twisting or collapsing inward", "use a smaller crossover first", "Lateral control demand is higher here."], "Forward Lunge": ["front leg load with the torso stacked", "step to a controlled distance and keep the knee tracking well", "pushing off the back leg too much", "use split squats or reverse lunges first", "A clean lunge pattern should already be in place."], "Goblet Squat": ["legs and glutes under a braced trunk", "hold the weight close and keep the chest tall", "rounding or letting the weight drift forward", "use bodyweight or box squats first", "Depth is secondary to alignment."], "Cable Pull-Throughs": ["glutes and hamstrings loading through a hinge", "hinge at the hips and stand by driving them forward", "turning it into a squat", "practice the hinge unloaded first", "Good hinge mechanics make this valuable."], "Lateral Band Walks": ["side glutes stabilizing the pelvis", "keep band tension and take small controlled steps", "letting the feet drag together", "use a lighter band before more tension", "Useful for frontal-plane hip control."], "Single-Leg Stance": ["tripod foot and quiet pelvis", "hold balance with small corrections", "clawing the toes or locking the knee", "remove hand support first", "Balance basics protect the later loading."], "Single-Leg Romanian Deadlifts": ["hamstrings and glute lengthening then driving up", "hinge while the free leg reaches back", "opening the pelvis or rounding the back", "use a hand-supported hinge first", "Balance, hinge control, and unilateral strength come together here."], "Loaded Step-Ups": ["same step-up pattern with the trunk braced", "keep the load close and the step height manageable", "using a step that is too high", "progress from bodyweight to loaded", "External load raises balance demands."], "Loaded Hip Thrusts": ["heavier glute squeeze at the top", "keep the ribs down and pause before lowering", "hyperextending the low back", "add load only after bodyweight reps are crisp", "Load should not change the movement pattern."], "Stair Climbing with Load": ["conditioning and leg strength with organized posture", "step deliberately and keep the pelvis level", "moving too fast or stomping", "build duration first", "This is strength and work capacity together."], "Sled Push": ["full-body drive through the legs and trunk", "lean as one unit and take short powerful steps", "rounding the back or rushing the steps", "start with light load and short distances", "Great because it loads the legs without a deep hinge."]};
-const AVOID_CUES = {"Deadlifts (Avoid)": ["large hinge plus load can spike spinal shear and fatigue", "long lever and load close to the floor make compensation easy", "rounding or overextending the back", "use bridges, hip thrusts, or supported hinging first", "Reintroduce only later with PT approval."], "Bent-Over Rows (Avoid)": ["sustained hinge can fatigue the back and hips", "the torso must stay inclined while the arms row", "unsupported hinge drifting into rotation", "use supported rows instead", "This is usually too much hinge demand early on."], "Romanian Deadlifts (Avoid)": ["deep hinge and hamstring load can be too aggressive", "the spine must stay controlled through a long lever", "dropping too deep or rounding", "use cable pull-throughs or bridges first", "Later only, if hinge tolerance is excellent."], "Good Mornings (Avoid)": ["bar-on-back leverage magnifies spinal demand", "a small technique error becomes a big hinge load", "forcing depth or losing the brace", "use safer hinge patterns first", "Usually a later-stage strength move."], "Lateral Lunges (Avoid)": ["side-to-side loading can exceed current hip and knee tolerance", "the body must absorb a wide frontal-plane shift", "reaching too far or collapsing inward", "use split squats or step-ups first", "Reintroduce only when frontal-plane control is ready."], "Abductor / Adductor Machine (Avoid)": ["fixed machine paths can force uncomfortable end ranges", "load is often increased before active control is ready", "pushing hard into the stops", "use band walks or side-lying work instead", "Consider much later only if specifically prescribed."], "Seated Leg Curl Machine (Avoid)": ["isolated hamstring loading may be too much in this phase", "the seat can encourage compression or pelvic compensation", "forcing heavy reps or cramping through the set", "use bridge-based hamstring work first", "Only return if later programming needs it."], "Rowing Machine (Avoid)": ["repetitive catch position combines flexion and force", "the catch can aggravate a sensitive back or hip", "rounding into the catch", "use bike or walking instead", "Reintroduce only after prolonged hinging is tolerated."], "Running During Recovery (Avoid)": ["repetitive impact may keep tissues irritated", "fatigue changes mechanics quickly", "returning to speed or distance too fast", "use walking or bike cardio first", "Only resume with a deliberate phase progression."], "Feet Straight in Squats/Lunges (Avoid)": ["forcing feet dead straight can block natural hip mechanics", "anatomy often needs a small natural turnout", "knees tracking against the feet", "use a comfortable natural stance", "This is usually a coaching cue, not a hard rule."]};
+    const defaultExercises = [
+      { id: 'dead-bugs', name: 'Dead Bugs', category: 'Strength', description: 'Supine core stabilization exercise maintaining neutral spine.', tags: ['core', 'stability'], drillDown: { whatToFeel: 'Deep abdominal tension without lower back arching.', technique: ['Lie flat on back with arms extended upward and knees bent at 90 degrees.', 'Lower opposite arm and leg slowly toward floor.', 'Return to start and switch sides.'], commonMistakes: ['Allowing lower back to lift off floor.'], progression: 'Extend limbs closer to ground or hold light weights.', notes: 'Breathe steadily throughout.' } },
+      { id: 'cat-cow', name: 'Cat-Cow Stretch', category: 'Stretching', description: 'Gentle spinal mobility flow on hands and knees.', tags: ['mobility', 'spine'], drillDown: { whatToFeel: 'Smooth articulation along entire vertebral column.', technique: ['Start on hands and knees.', 'Inhale to drop belly and lift chest (Cow).', 'Exhale to round back toward ceiling (Cat).'], commonMistakes: ['Rushing through the transitions.'], progression: 'Increase hold times at end ranges.', notes: 'Keep movements pain-free.' } }
+    ];
 
-const todayISO = () => new Date().toLocaleDateString('en-CA');
-const pad = n => String(n).padStart(2,'0');
-const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const splitLines = text => String(text ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-const csvEscape = v => {
-  const s = String(v ?? '');
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-};
-const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
-const isoFromDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const parseIso = iso => {
-  const [y,m,d] = iso.split('-').map(Number);
-  return new Date(y, m-1, d);
-};
-const slugify = s => String(s ?? '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'routine';
-const endOfMonth = d => new Date(d.getFullYear(), d.getMonth()+1, 0);
+    let state = loadState() || {
+      exercises: defaultExercises,
+      routineTemplates: {
+        'default': {
+          id: 'default',
+          name: 'Core & Mobility Routine',
+          exercises: [
+            { exerciseId: 'dead-bugs', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] },
+            { exerciseId: 'cat-cow', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] }
+          ]
+        }
+      },
+      activeRoutineId: 'default',
+      routines: {},
+      ui: { activeTab: 'today', search: '', monthOffset: 0, selectedLogDate: todayISO() }
+    };
 
-let state = loadState();
-let ui = { activeTab:'today', search:'', monthOffset:0, selectedLogDate:todayISO(), editingId:null };
+    let ui = state.ui;
 
-init();
-
-function init(){
-  ensureLibrarySeed();
-  ensureRoutineTemplates();
-  ensureTodayRoutine();
-  wireTabs();
-  wireGlobalControls();
-  renderAll();
-  setSaved(true, 'Ready');
-}
-
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      const parsed = JSON.parse(raw);
-      const loaded = {
-        exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
-        routines: parsed.routines && typeof parsed.routines === 'object' ? parsed.routines : {},
-        routineTemplates: parsed.routineTemplates && typeof parsed.routineTemplates === 'object' ? parsed.routineTemplates : {},
-        activeRoutineId: parsed.activeRoutineId || parsed.routineTemplateId || null,
-        settings: parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : { lastSync:null, version:4 }
-      };
-      migrateRoutineState(loaded);
-      return loaded;
-    }
-  }catch(err){}
-  return { exercises:[], routines:{}, routineTemplates:{}, activeRoutineId:null, settings:{ lastSync:null, version:4 } };
-}
-
-function migrateRoutineState(target){
-  if(!target.routineTemplates || typeof target.routineTemplates !== 'object') target.routineTemplates = {};
-  if(!target.activeRoutineId){
-    const first = Object.keys(target.routineTemplates)[0];
-    target.activeRoutineId = first || null;
-  }
-  const oldTemplate = Array.isArray(target.routineTemplate) ? target.routineTemplate : null;
-  if(oldTemplate && !target.activeRoutineId){
-    const id = 'routine-default';
-    target.routineTemplates[id] = {id, name:'Daily Routine', exercises:oldTemplate};
-    target.activeRoutineId = id;
-  }
-  // Migrate legacy flat date -> routine objects into the active named routine.
-  const migrated = {};
-  Object.entries(target.routines || {}).forEach(([key, value]) => {
-    if(!value || typeof value !== 'object') return;
-    if(value.date && value.routineId) {
-      migrated[key] = normalizeStoredRoutine(value);
-      return;
-    }
-    if(value.date && Array.isArray(value.exercises)) {
-      const rid = target.activeRoutineId || 'routine-default';
-      if(!target.routineTemplates[rid]){
-        target.routineTemplates[rid] = {id:rid, name:'Daily Routine', exercises:makeTemplateFromRoutine(value)};
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) {
+        return null;
       }
-      migrated[`${value.date}::${rid}`] = {...value, id:`routine-${value.date}-${rid}`, routineId:rid, routineName:target.routineTemplates[rid].name};
     }
-  });
-  target.routines = migrated;
-  delete target.routineTemplate;
-  target.settings = target.settings || {};
-  target.settings.version = 3;
-}
 
-function normalizeStoredRoutine(r){
-  return {
-    ...r,
-    exercises:Array.isArray(r.exercises) ? r.exercises.map(normalizeRoutineExercise) : [],
-    completionStatus:computeCompletionStatus(r)
-  };
-}
-
-function normalizeCategory(category){ return CATEGORY_MIGRATION[category] ?? category; }
-
-function buildGenericGuide(name, category){
-  const niceName = name.replace(/\s+\(Avoid\)$/,'');
-  const base = {
-    Stretch:{
-      whatToFeel:`A calm, moderate stretch in the target area from ${niceName}.`,
-      technique:['Set up slowly and breathe normally.','Move only until you feel tension, then stop before pain.','Hold the position without bouncing or twisting.','Come out with control.'],
-      commonMistakes:['forcing range','holding the breath','twisting the pelvis or spine'],
-      progression:'Increase hold time first, then range only if the stretch stays comfortable.',
-      notes:'A good stretch should feel local and controlled.'
-    },
-    Strength:{
-      whatToFeel:`${niceName} should turn on the target muscles with stable joints and a controlled tempo.`,
-      technique:['Set the position and brace lightly.','Move slowly enough to avoid swinging or momentum.','Pause where the target muscles should work hardest.','Return with the same control you used on the way out.'],
-      commonMistakes:['using momentum','arching the low back','letting knees or pelvis drift'],
-      progression:'Add a pause, slow the tempo, increase range, or add light resistance as form stays consistent.',
-      notes:'Quality reps matter more than hitting a rep count.'
-    },
-    Nerve:{
-      whatToFeel:'A light glide or release, not a hard stretch, burn, or symptom flare.',
-      technique:['Move slowly and keep the range small at first.','Coordinate the joints so the nerve glides rather than clamps.','Repeat smoothly without holding the end range.','Back off if symptoms intensify or linger.'],
-      commonMistakes:['treating it like a hard stretch','holding the end range','pushing into symptom flare'],
-      progression:'Shorten the range before increasing it, and keep the dose easy.',
-      notes:'Nerve work should settle quickly after the set.'
-    },
-    Cardio:{
-      whatToFeel:'A gradual rise in heart rate and breathing without a symptom flare.',
-      technique:['Start easier than you think you need to.','Use a pace you can sustain with smooth mechanics.','Keep the trunk relaxed and the movement steady.','Cool down gently.'],
-      commonMistakes:['starting too hard','slouching','ignoring symptom changes'],
-      progression:'Increase time first, then intensity only if the next day feels okay.',
-      notes:'Cardio should support recovery, not create a hangover.'
-    },
-    Decompression:{
-      whatToFeel:'Less pressure, less guarding, and a sense of support or relief.',
-      technique:['Set up so the target area can relax.','Breathe slowly and let the muscles soften.','Use the position or tool without forcing a deep stretch.','Come out gradually and note the response.'],
-      commonMistakes:['turning it into an aggressive stretch','staying in a painful position','overdoing intensity'],
-      progression:'Add time or a small range change only when the position is clearly relieving.',
-      notes:'Decompression is often best before or after active work.'
-    },
-    Phase2:{
-      whatToFeel:`A stronger but controlled training stimulus in ${niceName}. This is a Phase 2 exercise and requires prior Phase 1 mastery.`,
-      technique:['Set the load or body position so the first reps are repeatable.','Brace the trunk and keep the pelvis and ribs organized.','Move through the range you can control without twisting, bouncing, or collapsing.','Finish each rep in the same alignment you started with.'],
-      commonMistakes:['adding load before the pattern is stable','letting the low back take over','rushing the tempo'],
-      progression:'Progress one variable at a time: reps, range, load, or complexity.',
-      notes:'Do not progress if pain, compensation, or next-day flare-ups increase.'
-    },
-    Avoid:{
-      whatToFeel:`This pattern can create too much hinge, shear, compression, or fatigue for recovery right now. ${niceName} is listed as an avoid exercise.`,
-      technique:['The main issue is the loading pattern itself: a large hinge, held spine, or aggressive lever can shift stress to irritated tissues.','As the set gets hard, compensation usually increases and the movement stops being clean.','That is why this pattern stays out of the early program.'],
-      commonMistakes:['treating it like a normal strengthening exercise','adding load too soon','ignoring symptom changes'],
-      progression:'Use a safer substitute first, such as bridges, supported squats, step-ups, or other Phase 1/2 patterns.',
-      notes:'Reintroduce only later and only if the PT specifically wants it back.'
+    function persist(notify = true) {
+      try {
+        state.ui = ui;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if(notify) toast('Changes saved');
+      } catch(e) {
+        toast('Error saving state to storage', true);
+      }
     }
-  };
-  return base[category];
-}
 
-function buildGuide(name, category){
-  const cue = SPECIAL_CUES[name];
-  if(cue){
-    return { whatToFeel: cue.feel, technique: cue.steps, commonMistakes: cue.mistakes, progression: cue.progression, notes: cue.notes };
-  }
-  if(category === 'Phase2'){
-    const p = PHASE2_CUES[name];
-    return {
-      whatToFeel: `${name} should feel like ${p.feel}. This is a Phase 2 exercise and requires prior Phase 1 mastery.`,
-      technique: ['Set up so the first reps are controlled and repeatable.', p.step, 'Stop before trunk, pelvis, or knees drift out of position.', 'Reset and repeat with the same shape.'],
-      commonMistakes: [p.bad, 'adding load before form is ready','rushing the tempo or using momentum'],
-      progression: `${p.progression}.`,
-      notes: `Phase 2 exercise. ${p.notes}`
-    };
-  }
-  if(category === 'Avoid'){
-    const a = AVOID_CUES[name];
-    return {
-      whatToFeel: `${name} tends to create ${a.feel}.`,
-      technique: [a.step1, a.step2, 'The movement often becomes less clean as fatigue rises, which is why it is not used now.'],
-      commonMistakes: [a.bad, 'treating the movement as harmless just because it feels familiar','ignoring symptoms during or after the session'],
-      progression: a.progression,
-      notes: a.notes
-    };
-  }
-  return buildGenericGuide(name, category);
-}
+    function todayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
-function enrichExercises(list){
-  return list.map(ex => ({ ...ex, drillDown: ex.drillDown || buildGuide(ex.name, ex.category) }));
-}
+    function isoFromDate(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
-function ensureLibrarySeed(){
-  const seeded = enrichExercises(BASE_EXERCISES)
-    .map(ex => ({...ex, category:normalizeCategory(ex.category)}))
-    .filter(ex => ex.category && CATEGORY_META[ex.category]);
-  const seededById = new Map(seeded.map(ex => [ex.id, ex]));
-  if(!Array.isArray(state.exercises) || !state.exercises.length){
-    state.exercises = seeded.filter(ex => ex.category !== 'Cardio');
-    persist(false);
-    return;
-  }
-  const existingIds = new Set(state.exercises.map(ex => ex.id));
-  const merged = state.exercises.map(ex => {
-    const seed = seededById.get(ex.id);
-    const category = normalizeCategory(ex.category);
-    return { ...ex, category, drillDown: ex.drillDown || seed?.drillDown || buildGuide(ex.name, category) };
-  }).filter(ex => ex.category && CATEGORY_META[ex.category]);
-  seeded.forEach(seed => {
-    if(seed.category && CATEGORY_META[seed.category] && !existingIds.has(seed.id)) merged.push(seed);
-  });
-  state.exercises = merged.filter(ex => ex.category !== 'Cardio');
-}
+    function toast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = isError ? 'var(--danger-bg)' : 'rgba(255,255,255,.15)';
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2800);
+    }
 
-function makeTemplateFromRoutine(routine){
-  return (routine?.exercises || []).map(entry => ({
-    exerciseId: entry.exerciseId,
-    sets: Math.max(1, Number(entry.sets || 1)),
-    reps: Math.max(0, Number(entry.reps || 0)),
-    holdDuration: Math.max(0, Number(entry.holdDuration || 0)),
-    holdRep: entry.holdRep == null || entry.holdRep === '' ? null : Number(entry.holdRep)
-  }));
-}
+    function slugify(str) {
+      return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
 
-function makeRoutineFromTemplate(date, routineId=state.activeRoutineId){
-  const template = state.routineTemplates?.[routineId];
-  const entries = Array.isArray(template?.exercises) ? template.exercises : [];
-  return {
-    id:`routine-${date}-${routineId}`,
-    date,
-    routineId,
-    routineName: template?.name || 'Routine',
-    exercises: entries.map(entry => ({
-      exerciseId: entry.exerciseId,
-      sets: Math.max(1, Number(entry.sets || 1)),
-      reps: Math.max(0, Number(entry.reps || 0)),
-      holdDuration: Math.max(0, Number(entry.holdDuration || 0)),
-      holdRep: entry.holdRep == null ? null : Number(entry.holdRep),
-      completed: Array.from({length:Math.max(1, Number(entry.sets || 1))}, () => false)
-    })),
-    completionStatus:'none',
-    notes:''
-  };
-}
+    function normalizeCategory(c) {
+      return c ? c.charAt(0).toUpperCase() + c.slice(1).toLowerCase() : 'Strength';
+    }
 
-function ensureRoutineTemplates(){
-  if(!state.routineTemplates || typeof state.routineTemplates !== 'object') state.routineTemplates = {};
-  if(!Object.keys(state.routineTemplates).length){
-    const id = 'routine-default';
-    state.routineTemplates[id] = {id, name:'Daily Routine', exercises:[], createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()};
-    state.activeRoutineId = id;
-  }
-  if(!state.activeRoutineId || !state.routineTemplates[state.activeRoutineId]) state.activeRoutineId = Object.keys(state.routineTemplates)[0];
-  Object.values(state.routineTemplates).forEach(r => {
-    r.id = r.id || `routine-${slugify(r.name || 'routine')}`;
-    r.name = String(r.name || 'Routine').trim() || 'Routine';
-    r.exercises = Array.isArray(r.exercises) ? r.exercises.map(e => ({
-      exerciseId:e.exerciseId,
-      sets:Math.max(1,Number(e.sets||1)), reps:Math.max(0,Number(e.reps||0)),
-      holdDuration:Math.max(0,Number(e.holdDuration||0)), holdRep:e.holdRep==null?null:Number(e.holdRep)
-    })) : [];
-  });
-}
+    function getActiveTemplate() {
+      return state.routineTemplates[state.activeRoutineId] || Object.values(state.routineTemplates)[0];
+    }
 
-function ensureTodayRoutine(){
-  ensureRoutineTemplates();
-  ensureRoutineSession(todayISO(), state.activeRoutineId);
-  normalizeAllRoutines();
-  persist(false);
-}
+    function getRoutine(dateISO, routineId = state.activeRoutineId) {
+      const key = `${dateISO}__${routineId}`;
+      if(!state.routines[key]) {
+        const template = state.routineTemplates[routineId] || getActiveTemplate();
+        state.routines[key] = {
+          date: dateISO,
+          routineId: template.id,
+          routineName: template.name,
+          exercises: template.exercises.map(ex => ({
+            exerciseId: ex.exerciseId,
+            sets: ex.sets,
+            reps: ex.reps,
+            holdDuration: ex.holdDuration,
+            holdRep: ex.holdRep,
+            completed: Array.from({length: ex.sets}, () => false)
+          })),
+          completionStatus: 'none'
+        };
+      }
+      return state.routines[key];
+    }
 
-function ensureRoutineSession(date, routineId=state.activeRoutineId){
-  const key = `${date}::${routineId}`;
-  if(!state.routines[key]) state.routines[key] = makeRoutineFromTemplate(date, routineId);
-  return state.routines[key];
-}
+    function ensureRoutineSession(dateISO, routineId) {
+      getRoutine(dateISO, routineId);
+    }
 
-function normalizeAllRoutines(){
-  Object.keys(state.routines || {}).forEach(key => {
-    const routine = state.routines[key];
-    if(!routine || typeof routine !== 'object' || !routine.date || !routine.routineId){ delete state.routines[key]; return; }
-    routine.id = routine.id || `routine-${routine.date}-${routine.routineId}`;
-    routine.routineName = routine.routineName || state.routineTemplates?.[routine.routineId]?.name || 'Routine';
-    routine.exercises = Array.isArray(routine.exercises) ? routine.exercises.map(normalizeRoutineExercise) : [];
-    routine.notes = typeof routine.notes === 'string' ? routine.notes : '';
-    routine.completionStatus = computeCompletionStatus(routine);
-  });
-}
+    function computeCompletionStatus(routine) {
+      const list = routine.exercises || [];
+      let totalSets = 0, completedSets = 0;
+      list.forEach(item => {
+        totalSets += (item.sets || 0);
+        completedSets += (item.completed || []).filter(Boolean).length;
+      });
+      if(totalSets === 0 || completedSets === 0) return 'none';
+      if(completedSets >= totalSets) return 'full';
+      return 'partial';
+    }
 
-function normalizeRoutineExercise(ex){
-  const sets = Math.max(1, Number(ex.sets || 1));
-  const completed = Array.from({length:sets}, (_, i) => Boolean(ex.completed && ex.completed[i]));
-  return {
-    exerciseId: ex.exerciseId,
-    sets,
-    reps: Math.max(0, Number(ex.reps || 0)),
-    holdDuration: Math.max(0, Number(ex.holdDuration || 0)),
-    holdRep: ex.holdRep === null || ex.holdRep === '' || Number.isNaN(Number(ex.holdRep)) ? null : Number(ex.holdRep),
-    completed
-  };
-}
+    function replaceActiveTemplateFromRoutine(routine) {
+      const template = state.routineTemplates[state.activeRoutineId];
+      if(!template) return;
+      template.exercises = routine.exercises.map(item => ({
+        exerciseId: item.exerciseId,
+        sets: item.sets,
+        reps: item.reps,
+        holdDuration: item.holdDuration,
+        holdRep: item.holdRep,
+        completed: Array.from({length: item.sets}, () => false)
+      }));
+      template.updatedAt = new Date().toISOString();
+    }
 
-function getActiveTemplate(){
-  ensureRoutineTemplates();
-  return state.routineTemplates[state.activeRoutineId];
-}
+    function switchTab(tabName) {
+      ui.activeTab = tabName;
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      const panelId = tabName === 'builder' ? 'builderPanel' : tabName + 'Panel';
+      document.getElementById(panelId).classList.add('active');
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      renderActive();
+    }
 
-function replaceActiveTemplateFromRoutine(routine){
-  const template = getActiveTemplate();
-  template.exercises = makeTemplateFromRoutine(routine);
-  template.updatedAt = new Date().toISOString();
-}
+    function renderActive() {
+      if(ui.activeTab === 'today') renderToday();
+      else if(ui.activeTab === 'builder') renderEdit();
+      else if(ui.activeTab === 'library') renderLibrary();
+      else if(ui.activeTab === 'log') renderLog();
+      updateTabBadge();
+    }
 
-function applyTemplateToToday(){
-  const date = todayISO();
-  const current = ensureRoutineSession(date, state.activeRoutineId);
-  const oldById = new Map((current.exercises || []).map(x => [x.exerciseId, x]));
-  const template = getActiveTemplate();
-  current.routineName = template.name;
-  current.exercises = (template.exercises || []).map(entry => {
-    const old = oldById.get(entry.exerciseId);
-    const sets = Math.max(1, Number(entry.sets || 1));
-    return {
-      exerciseId: entry.exerciseId,
-      sets,
-      reps: Math.max(0, Number(entry.reps || 0)),
-      holdDuration: Math.max(0, Number(entry.holdDuration || 0)),
-      holdRep: entry.holdRep == null ? null : Number(entry.holdRep),
-      completed: Array.from({length:sets}, (_, i) => Boolean(old?.completed?.[i]))
-    };
-  });
-  current.completionStatus = computeCompletionStatus(current);
-  state.routines[`${date}::${state.activeRoutineId}`] = current;
-}
+    function renderToday() {
+      const container = document.getElementById('todayContent');
+      const routineIds = Object.keys(state.routineTemplates);
+      const activeRoutine = getRoutine(todayISO(), state.activeRoutineId);
+      
+      let html = `
+        <div class="row spaced" style="margin-bottom: 12px; flex-wrap: wrap;">
+          <div><strong>Date:</strong> ${todayISO()}</div>
+          <div class="row" style="gap: 6px;">
+            <label for="activeRoutineSelect" style="margin:0; align-self:center;">Routine:</label>
+            <select id="activeRoutineSelect" data-active-routine style="width: auto; min-width: 180px;">
+              ${routineIds.map(id => `<option value="${id}" ${id === state.activeRoutineId ? 'selected' : ''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      `;
 
-function computeCompletionStatus(routine){
-  if(!routine || !routine.exercises || !routine.exercises.length) return 'none';
-  const total = routine.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
-  const done = routine.exercises.reduce((sum, ex) => sum + (ex.completed || []).filter(Boolean).length, 0);
-  if(done === 0) return 'none';
-  if(done === total) return 'full';
-  return 'partial';
-}
-
-function getRoutine(date, routineId=state.activeRoutineId){
-  ensureRoutineTemplates();
-  return ensureRoutineSession(date, routineId);
-}
-
-function getDaySessions(date){
-  return Object.values(state.routines || {}).filter(r => r.date === date);
-}
-
-function getDayStatus(date){
-  const sessions = getDaySessions(date);
-  if(!sessions.length) return null;
-  if(sessions.some(r => r.completionStatus === 'full')) return 'full';
-  if(sessions.some(r => r.completionStatus === 'partial')) return 'partial';
-  return 'none';
-}
-
-function persist(showToast = true){
-  try{
-    ensureRoutineTemplates();
-    normalizeAllRoutines();
-    state.settings = state.settings || {};
-    state.settings.lastSync = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    setSaved(true, 'Saved');
-    if(showToast) toast('Saved');
-  }catch(err){
-    setSaved(false, 'Save failed');
-    toast('Storage is full or unavailable. Please clear logs or free space.', true);
-  }
-}
-
-function setSaved(ok, message){
-  const dot = document.getElementById('savedDot');
-  const text = document.getElementById('savedText');
-  dot.className = `dot ${ok ? 'saved' : 'busy'}`;
-  text.textContent = message;
-}
-
-function toast(msg, isError=false){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.background = isError ? '#9b1c1c' : '#18202a';
-  el.classList.add('show');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
-}
-
-function wireTabs(){
-  document.getElementById('tabs').addEventListener('click', (e)=>{
-    const btn = e.target.closest('.tab-btn');
-    if(!btn) return;
-    ui.activeTab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
-    const panelId = ui.activeTab === 'builder' ? 'editPanel' : `${ui.activeTab}Panel`;
-    document.getElementById(panelId).classList.add('active');
-    renderActive();
-  });
-}
-
-function wireGlobalControls(){
-  document.getElementById('todayPanel').addEventListener('change', onTodayChange);
-  document.getElementById('editPanel').addEventListener('input', onEditInput);
-  document.getElementById('editPanel').addEventListener('change', onEditChange);
-  document.getElementById('libraryPanel').addEventListener('input', onLibrarySearch);
-  document.getElementById('libraryPanel').addEventListener('click', onLibraryPanelClick);
-    document.getElementById('libraryManagerContent').addEventListener('click', onLibraryManagerClick);
-  document.getElementById('libraryManagerContent').addEventListener('submit', onLibraryManagerSubmit);
-  document.getElementById('logPanel').addEventListener('click', onLogClick);
-  document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id === 'modalBackdrop') closeModal(); });
-  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-  document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
-  document.getElementById('exerciseModalForm').addEventListener('submit', onModalSubmit);
-  document.getElementById('libraryManagerBackdrop').addEventListener('click', (e)=>{ if(e.target.id === 'libraryManagerBackdrop') closeLibraryManager(); });
-  document.getElementById('closeLibraryManagerBtn').addEventListener('click', closeLibraryManager);
-}
-
-function renderAll(){ renderToday(); renderLibrary(); renderEdit(); renderLog(); updateTabBadge(); }
-function renderActive(){
-  if(ui.activeTab === 'today') renderToday();
-  else if(ui.activeTab === 'library') renderLibrary();
-  else if(ui.activeTab === 'builder') renderEdit();
-  else if(ui.activeTab === 'log') renderLog();
-  updateTabBadge();
-}
-
-function getExerciseById(id){ return state.exercises.find(ex => ex.id === id); }
-
-function renderToday(){
-  const panel = document.getElementById('todayPanel');
-  const date = todayISO();
-  ensureRoutineTemplates();
-  ensureRoutineSession(date, state.activeRoutineId);
-  const routine = getRoutine(date);
-  const totalSets = routine.exercises.reduce((s, ex) => s + ex.sets, 0);
-  const completedSets = routine.exercises.reduce((s, ex) => s + (ex.completed || []).filter(Boolean).length, 0);
-  const status = routine.completionStatus;
-  const statusLabel = status === 'full' ? 'Full completion' : status === 'partial' ? 'Partial completion' : 'No completion yet';
-  const statusColor = status === 'full' ? 'success' : status === 'partial' ? 'warn' : 'muted';
-  const routineOptions = Object.values(state.routineTemplates).sort((a,b)=>a.name.localeCompare(b.name)).map(r => `<option value="${escapeHtml(r.id)}" ${r.id===state.activeRoutineId?'selected':''}>${escapeHtml(r.name)}</option>`).join('');
-  const routineHtml = routine.exercises.length ? routine.exercises.map((entry) => {
-    const ex = getExerciseById(entry.exerciseId);
-    const guide = ex?.drillDown || buildGuide(ex?.name || '', ex?.category || 'Strength');
-    const holdText = entry.holdDuration > 0 ? `${entry.holdDuration}-second hold${entry.holdRep ? ` on rep ${entry.holdRep}` : ''}` : '';
-    return `
-      <div class="routine-item">
-        <div class="routine-top">
-          <div>
-            <div class="routine-name">${escapeHtml(ex ? ex.name : 'Unknown exercise')}</div>
-            <div class="routine-meta">
-              <span class="chip ${ex ? CATEGORY_META[ex.category].cls : ''}">${escapeHtml(ex ? CATEGORY_META[ex.category].label : 'Exercise')}</span>
-              <span class="chip">${entry.sets} × ${entry.reps || 0}</span>
-              ${holdText ? `<span class="chip">${escapeHtml(holdText)}</span>` : ''}
+      if(!activeRoutine.exercises || activeRoutine.exercises.length === 0) {
+        html += `<div class="subtle">No exercises in this routine yet. Visit the Routine Builder tab to add some[cite: 1].</div>`;
+      } else {
+        activeRoutine.exercises.forEach((item, idx) => {
+          const ex = state.exercises.find(x => x.id === item.exerciseId) || { name: 'Unknown Exercise', category: 'General', description: '' };
+          html += `
+            <div class="card exercise-card" style="margin-bottom: 12px;">
+              <div class="row spaced">
+                <div>
+                  <h4 style="margin:0; font-size: 1.05rem;">${escapeHtml(ex.name)}</h4>
+                  <span class="chip" style="margin-top: 4px;">${escapeHtml(ex.category)}</span>
+                </div>
+                <div class="subtle">${item.sets} sets × ${item.reps} reps${item.holdDuration ? ` (${item.holdDuration}s hold)` : ''}</div>
+              </div>
+              <p class="exercise-desc" style="margin: 8px 0;">${escapeHtml(ex.description)}</p>
+              <div class="row" style="flex-wrap: wrap; gap: 4px; margin-top: 8px;">
+                ${Array.from({length: item.sets}, (_, sIdx) => `
+                  <label class="set-box">
+                    <input type="checkbox" data-today-date="${todayISO()}" data-routine-id="${state.activeRoutineId}" data-exercise-id="${item.exerciseId}" data-set-index="${sIdx}" ${item.completed[sIdx] ? 'checked' : ''}>
+                    Set ${sIdx + 1}
+                  </label>
+                `).join('')}
+              </div>
+              ${ex.drillDown ? `
+                <details class="guide" style="margin-top: 10px;">
+                  <summary>Exercise Guide</summary>
+                  <div class="guide-body">
+                    ${ex.drillDown.whatToFeel ? `<div><strong>What to Feel:</strong> ${escapeHtml(ex.drillDown.whatToFeel)}</div>` : ''}
+                    ${ex.drillDown.technique?.length ? `<div style="margin-top:4px;"><strong>Technique:</strong><ul>${ex.drillDown.technique.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>` : ''}
+                  </div>
+                </details>
+              ` : ''}
             </div>
-          </div>
-          <button class="btn secondary small" type="button" data-today-guide="${escapeHtml(entry.exerciseId)}">Guide</button>
-        </div>
-        <div class="set-row">
-          ${Array.from({length: entry.sets}, (_, i) => `
-            <label class="set-box">
-              <input type="checkbox" data-today-date="${date}" data-routine-id="${escapeHtml(state.activeRoutineId)}" data-exercise-id="${entry.exerciseId}" data-set-index="${i}" ${entry.completed[i] ? 'checked' : ''}>
-              <span>Set ${i+1}</span>
-            </label>
-          `).join('')}
-        </div>
-        <div id="todayGuide-${entry.exerciseId}" style="display:none;margin-top:10px">${buildGuideHtml(guide)}</div>
-      </div>
-    `;
-  }).join('') : `<div class="card"><p class="subtle">No exercises are in this routine yet. Go to <strong>Routine Builder</strong> to build it.</p></div>`;
+          `;
+        });
+      }
+      container.innerHTML = html;
+    }
 
-  panel.innerHTML = `
-    <div class="today-head">
-      <div class="card">
-        <div class="row spaced">
-          <div>
-            <h2 class="section-title">Today: ${date}</h2>
-            <div class="subtle">${escapeHtml(routine.routineName || 'Routine')} · ${totalSets ? `${completedSets}/${totalSets} sets` : 'No exercises yet'}</div>
-          </div>
-          <div class="field" style="min-width:220px">
-            <label for="todayRoutineSelect">Routine</label>
-            <select id="todayRoutineSelect" data-active-routine>${routineOptions}</select>
+    function renderEdit() {
+      const container = document.getElementById('editPanel');
+      const routineIds = Object.keys(state.routineTemplates);
+      const activeTemplate = getActiveTemplate();
+      const routine = getRoutine(todayISO(), state.activeRoutineId);
+
+      let html = `
+        <div class="row spaced" style="margin-bottom: 14px; flex-wrap: wrap;">
+          <div class="row" style="gap: 8px; flex: 1; min-width: 240px;">
+            <select id="routineSelect" data-select-routine style="flex: 1;">
+              ${routineIds.map(id => `<option value="${id}" ${id === state.activeRoutineId ? 'selected' : ''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
+            </select>
+            <button class="btn secondary small" type="button" data-delete-routine>Delete Routine</button>
           </div>
         </div>
-        <div class="row" style="margin-bottom:10px;margin-top:10px">
-          <span class="chip ${statusColor}">${statusLabel}</span>
-          <span class="chip">${totalSets ? `${Math.round((completedSets/totalSets)*100)}%` : '0%'}</span>
+        
+        <div class="card routine-item" style="margin-bottom: 14px;">
+          <h3 class="section-title">Routine Name</h3>
+          <div class="row" style="gap: 8px;">
+            <input id="routineNameInput" value="${escapeHtml(activeTemplate.name)}" style="flex:1;">
+            <button class="btn small" type="button" data-rename-routine>Save Name</button>
+          </div>
         </div>
-        <div class="status-big">${completedSets} / ${totalSets || 0} sets completed today</div>
-        <div class="helper">Your named routines persist. Each day starts with fresh unchecked boxes for the routine you select.</div>
-      </div>
-    </div>
-    <div class="section-block" style="margin-top:14px">
-      <div class="card">
-        <div class="row spaced">
-          <h3 class="section-title">${escapeHtml(routine.routineName || 'Routine')}</h3>
-          <span class="chip">Today</span>
-        </div>
-        ${routineHtml}
-        <div class="footer-note">Summary: ${completedSets}/${totalSets || 0} sets completed today.</div>
-      </div>
-    </div>
-  `;
-}
 
-function buildGuideHtml(guide){
-  return `
-    <div class="guide-grid">
-      <div class="mini-box">
-        <h5>What to Feel</h5>
-        <div>${escapeHtml(guide.whatToFeel)}</div>
-      </div>
-      <div class="mini-box">
-        <h5>Technique</h5>
-        <ul>${guide.technique.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
-      </div>
-      <div class="mini-box">
-        <h5>Common Mistakes</h5>
-        <ul>${guide.commonMistakes.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
-      </div>
-      <div class="mini-box">
-        <h5>Progression</h5>
-        <div>${escapeHtml(guide.progression)}</div>
-      </div>
-      <div class="mini-box" style="grid-column:1/-1">
-        <h5>Notes</h5>
-        <div>${escapeHtml(guide.notes)}</div>
-      </div>
-    </div>
-  `;
-}
+        <div class="card">
+          <h3 class="section-title">Exercises in Routine</h3>
+          <div id="routineExerciseList">
+            ${routine.exercises.length === 0 ? '<div class="subtle">No exercises added to this routine yet.</div>' : ''}
+            ${routine.exercises.map((item, idx) => {
+              const ex = state.exercises.find(x => x.id === item.exerciseId) || { name: 'Unknown Exercise' };
+              return `
+                <div class="mini-box" style="margin-bottom: 10px;">
+                  <div class="row spaced">
+                    <strong>${escapeHtml(ex.name)}</strong>
+                    <button class="btn danger small" type="button" data-remove-routine="${idx}">Remove</button>
+                  </div>
+                  <div class="row" style="margin-top: 8px; gap: 8px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size:0.8rem;">Sets</label>
+                      <input type="number" min="1" value="${item.sets}" data-routine-field="sets" data-index="${idx}">
+                    </div>
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size:0.8rem;">Reps</label>
+                      <input type="number" min="0" value="${item.reps}" data-routine-field="reps" data-index="${idx}">
+                    </div>
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size:0.8rem;">Hold (sec)</label>
+                      <input type="number" min="0" value="${item.holdDuration || 0}" data-routine-field="holdDuration" data-index="${idx}">
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
 
-function renderLibrary(){
-  const panel = document.getElementById('libraryPanel');
-  const q = (ui.search || '').trim().toLowerCase();
-  const grouped = {};
-  state.exercises.forEach(ex => {
-    const blob = `${ex.name} ${ex.category} ${ex.description} ${(ex.tags || []).join(' ')}`.toLowerCase();
-    if(q && !blob.includes(q)) return;
-    (grouped[ex.category] ||= []).push(ex);
-  });
-  const groupsHtml = CATEGORY_ORDER.map(cat => {
-    const items = (grouped[cat] || []).slice().sort((a,b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    if(!items.length) return '';
-    return `
-      <div class="cat-group">
-        <div class="row spaced" style="margin-bottom:10px">
-          <h3 class="section-title">${escapeHtml(CATEGORY_META[cat].label)}</h3>
-          <span class="chip ${CATEGORY_META[cat].cls}">${items.length}</span>
+          <div class="row" style="margin-top: 14px; gap: 8px;">
+            <select id="addExerciseSelect" style="flex: 1;">
+              ${state.exercises.map(ex => `<option value="${ex.id}">${escapeHtml(ex.name)} (${escapeHtml(ex.category)})</option>`).join('')}
+            </select>
+            <button class="btn small" type="button" data-add-to-routine>Add Exercise</button>
+          </div>
         </div>
-        ${items.map(ex => `
-          <div class="exercise-card">
-            <div class="exercise-head">
-              <div>
-                <h4>${escapeHtml(ex.name)}</h4>
-                <div class="row" style="margin-top:6px">
-                  <span class="chip ${CATEGORY_META[cat].cls}">${CATEGORY_META[cat].label}</span>
-                  ${cat === 'Avoid' ? `<span class="chip warn">Avoid during recovery</span>` : ''}
+
+        <div class="card">
+          <h3 class="section-title">Create New Routine</h3>
+          <div class="row" style="gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+            <input id="newRoutineName" placeholder="New routine name..." style="flex: 1; min-width: 200px;">
+            <select id="newRoutineSource" style="width: auto;">
+              <option value="blank">Start Blank</option>
+              <option value="existing">Duplicate Existing</option>
+            </select>
+          </div>
+          <div id="newRoutineSourceWrap" style="display:none; margin-bottom: 8px;">
+            <select id="newRoutineSourceId">
+              ${routineIds.map(id => `<option value="${id}">${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
+            </select>
+          </div>
+          <button class="btn small" type="button" data-create-routine>Create Routine</button>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+
+    function renderLibrary() {
+      const container = document.getElementById('libraryContent');
+      const search = (ui.search || '').toLowerCase();
+      const filtered = state.exercises.filter(ex => 
+        ex.name.toLowerCase().includes(search) || 
+        ex.category.toLowerCase().includes(search) ||
+        (ex.tags || []).some(t => t.toLowerCase().includes(search))
+      );
+
+      let html = `
+        <div class="row spaced" style="margin-bottom: 14px; flex-wrap: wrap;">
+          <input id="librarySearch" placeholder="Search exercises, categories, or tags..." value="${escapeHtml(ui.search)}" style="flex: 1; min-width: 200px;" oninput="onLibrarySearch(event)">
+          <button class="btn small" type="button" onclick="openModal()">Add New Exercise</button>
+        </div>
+        <div id="exerciseList">
+          ${filtered.length === 0 ? '<div class="subtle">No matching exercises found.</div>' : ''}
+          ${filtered.map(ex => `
+            <div class="card exercise-card" style="margin-bottom: 12px;">
+              <div class="row spaced">
+                <h4 style="margin:0;">${escapeHtml(ex.name)}</h4>
+                <div class="row" style="gap: 6px;">
+                  <span class="chip">${escapeHtml(ex.category)}</span>
+                  <button class="btn secondary small" type="button" onclick="openModal('${ex.id}')">Edit</button>
                 </div>
               </div>
-              <button class="btn secondary small" type="button" data-library-toggle="${escapeHtml(ex.id)}">Guide</button>
+              <p class="exercise-desc" style="margin: 8px 0;">${escapeHtml(ex.description)}</p>
+              ${ex.drillDown ? `
+                <details class="guide">
+                  <summary>View Guidance & Technique</summary>
+                  <div class="guide-body">
+                    ${ex.drillDown.whatToFeel ? `<div><strong>What to Feel:</strong> ${escapeHtml(ex.drillDown.whatToFeel)}</div>` : ''}
+                    ${ex.drillDown.technique?.length ? `<div style="margin-top:4px;"><strong>Technique:</strong><ul>${ex.drillDown.technique.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>` : ''}
+                    ${ex.drillDown.commonMistakes?.length ? `<div style="margin-top:4px;"><strong>Common Mistakes:</strong><ul>${ex.drillDown.commonMistakes.map(m=>`<li>${escapeHtml(m)}</li>`).join('')}</ul></div>` : ''}
+                  </div>
+                </details>
+              ` : ''}
             </div>
-            <div class="exercise-desc">${escapeHtml(ex.description)}</div>
-            <div id="libGuideWrap-${ex.id}" style="display:none;margin-top:10px">${buildGuideHtml(ex.drillDown || buildGuide(ex.name, ex.category))}<div class="form-actions" style="margin-top:10px"><button class="btn secondary small" type="button" data-edit-from-guide="${escapeHtml(ex.id)}">Edit Exercise</button></div></div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }).join('');
-  panel.innerHTML = `
-    <div class="library-search">
-      <div class="card">
-        <div class="row spaced">
-          <div>
-            <h2 class="section-title">Library</h2>
-            <div class="subtle">Search by name, category, description, or tags.</div>
-          </div>
-          <div class="inline-actions"><span class="chip">${state.exercises.length} exercises</span><button class="btn secondary small" type="button" data-open-library-manager>Manage Library</button></div>
+          `).join('')}
         </div>
-        <div style="margin-top:10px" class="field">
-          <label for="librarySearch">Search</label>
-          <input id="librarySearch" value="${escapeHtml(ui.search)}" placeholder="Try: glute, phase2, avoid, stretch">
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:14px">${groupsHtml || `<div class="card">No matches found.</div>`}</div>
-  `;
-}
-
-function renderEdit(){
-  const panel = document.getElementById('editPanel');
-  ensureRoutineTemplates();
-  const active = getActiveTemplate();
-  const routineOptions = Object.values(state.routineTemplates).sort((a,b)=>a.name.localeCompare(b.name)).map(r => `<option value="${escapeHtml(r.id)}" ${r.id===state.activeRoutineId?'selected':''}>${escapeHtml(r.name)}</option>`).join('');
-  const sourceOptions = Object.values(state.routineTemplates).sort((a,b)=>a.name.localeCompare(b.name)).map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join('');
-  const selectOptions = CATEGORY_ORDER.filter(cat => cat !== 'Avoid').map(cat => {
-    const items = state.exercises.filter(ex => ex.category === cat).slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
-    if(!items.length) return '';
-    return `<optgroup label="${escapeHtml(CATEGORY_META[cat].label)}">${items.map(ex => `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)}</option>`).join('')}</optgroup>`;
-  }).join('');
-  const routine = getRoutine(todayISO(), state.activeRoutineId);
-  const routineItems = routine.exercises.length ? routine.exercises.map((entry, idx) => {
-    const ex = getExerciseById(entry.exerciseId);
-    return `
-      <div class="routine-builder-item">
-        <div class="row spaced">
-          <div>
-            <div class="routine-name">${escapeHtml(ex ? ex.name : 'Unknown exercise')}</div>
-            <div class="routine-meta"><span class="chip ${ex ? CATEGORY_META[ex.category].cls : ''}">${escapeHtml(ex ? CATEGORY_META[ex.category].label : 'Exercise')}</span></div>
-          </div>
-          <button class="btn danger small" type="button" data-remove-routine="${idx}">Remove</button>
-        </div>
-        <div class="form-grid" style="margin-top:10px">
-          <div class="field"><label>Sets</label><input type="number" min="1" step="1" data-routine-field="sets" data-index="${idx}" value="${entry.sets}"></div>
-          <div class="field"><label>Reps</label><input type="number" min="0" step="1" data-routine-field="reps" data-index="${idx}" value="${entry.reps}"></div>
-          <div class="field"><label>Has hold?</label><select data-routine-field="hasHold" data-index="${idx}"><option value="no" ${entry.holdDuration > 0 ? '' : 'selected'}>No</option><option value="yes" ${entry.holdDuration > 0 ? 'selected' : ''}>Yes</option></select></div>
-          <div class="field"><label>Hold duration (sec)</label><input type="number" min="0" step="1" data-routine-field="holdDuration" data-index="${idx}" value="${entry.holdDuration || 0}" ${entry.holdDuration > 0 ? '' : 'disabled'}></div>
-          <div class="field"><label>Hold on rep</label><input type="number" min="1" step="1" data-routine-field="holdRep" data-index="${idx}" value="${entry.holdRep ?? ''}" ${entry.holdDuration > 0 ? '' : 'disabled'}></div>
-        </div>
-      </div>`;
-  }).join('') : `<div class="card"><p class="subtle">This routine is empty. Add exercises below, then save it.</p></div>`;
-
-  panel.innerHTML = `
-    <div>
-        <div class="card">
-          <div class="row spaced">
-            <div><h2 class="section-title">Routine Builder</h2><div class="subtle">Create and maintain reusable routines. A routine keeps the same structure until you edit it.</div></div>
-          </div>
-          <div class="fields tight" style="margin-top:12px">
-            <div class="field"><label for="routineSelect">Active routine</label><select id="routineSelect" data-select-routine>${routineOptions}</select></div>
-            <div class="field"><label for="routineNameInput">Routine name</label><input id="routineNameInput" value="${escapeHtml(active.name)}"></div>
-          </div>
-          <div class="form-actions">
-            <button class="btn secondary small" type="button" data-rename-routine>Save Name</button>
-            <button class="btn danger small" type="button" data-delete-routine ${Object.keys(state.routineTemplates).length <= 1 ? 'disabled' : ''}>Delete Routine</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3 class="section-title">Create a New Routine</h3>
-          <div class="subtle">Start with a blank routine or copy an existing routine and modify it.</div>
-          <div class="fields tight" style="margin-top:12px">
-            <div class="field"><label for="newRoutineName">New routine name</label><input id="newRoutineName" placeholder="e.g. Evening Recovery"></div>
-            <div class="field"><label for="newRoutineSource">Starting point</label><select id="newRoutineSource"><option value="blank">Start Fresh</option><option value="existing">Start from Existing Routine</option></select></div>
-            <div class="field" id="newRoutineSourceWrap" style="display:none"><label for="newRoutineSourceId">Copy from</label><select id="newRoutineSourceId">${sourceOptions}</select></div>
-          </div>
-          <div class="form-actions"><button class="btn small" type="button" data-create-routine>Create Routine</button></div>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <div class="row spaced"><div><h3 class="section-title">${escapeHtml(active.name)}</h3><div class="subtle">This routine repeats every day. Previous daily activity remains in its own dated session.</div></div><button class="btn secondary small" type="button" data-save-routine>Save Routine</button></div>
-          <div class="section-block" style="margin-top:12px">
-            <div class="field"><label for="addExerciseSelect">Add exercise from library</label><select id="addExerciseSelect">${selectOptions}</select></div>
-            <div class="form-actions"><button class="btn small" type="button" data-add-to-routine>Add to ${escapeHtml(active.name)}</button></div>
-          </div>
-          <div class="exercise-list" id="routineItems">${routineItems}</div>
-        </div>
-      </div>
-
-    </div>`;
-}
-
-function renderLibraryManager(){
-  const host = document.getElementById('libraryManagerContent');
-  const grouped = {};
-  state.exercises.forEach(ex => (grouped[ex.category] ||= []).push(ex));
-  const cards = CATEGORY_ORDER.map(cat => {
-    const items = (grouped[cat] || []).slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
-    if(!items.length) return '';
-    return `<div class="library-manager-group"><h4 class="section-title">${escapeHtml(CATEGORY_META[cat].label)} <span class="chip ${CATEGORY_META[cat].cls}">${items.length}</span></h4>${items.map(ex => `
-      <div class="library-manager-item">
-        <div class="row spaced">
-          <div>
-            <div class="routine-name">${escapeHtml(ex.name)}</div>
-            <div class="muted" style="margin-top:4px">${escapeHtml(ex.description)}</div>
-          </div>
-          <div class="inline-actions">
-            <button class="btn secondary small" type="button" data-edit-ex="${escapeHtml(ex.id)}">Edit</button>
-            <button class="btn danger small" type="button" data-delete-ex="${escapeHtml(ex.id)}">Delete</button>
-          </div>
-        </div>
-      </div>`).join('')}</div>`;
-  }).join('');
-  host.innerHTML = `
-    <div class="library-manager-list">${cards || '<div class="subtle">No exercises in the library.</div>'}</div>
-    <div class="library-manager-divider"></div>
-    <div>
-      <h4 class="section-title">Add New Exercise to Library</h4>
-      <form id="addExerciseForm">
-        <input type="hidden" name="id" value="">
-        <div class="fields">
-          <div class="field"><label>Name</label><input name="name" required></div>
-          <div class="field"><label>Category</label><select name="category" required><option>Stretch</option><option>Strength</option><option>Decompression</option><option>Avoid</option></select></div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Description</label><textarea name="description" required></textarea></div>
-        <div class="fields" style="margin-top:12px"><div class="field"><label>What to Feel</label><textarea name="whatToFeel"></textarea></div><div class="field"><label>Progression</label><textarea name="progression"></textarea></div></div>
-        <div class="fields" style="margin-top:12px"><div class="field"><label>Technique (one item per line)</label><textarea name="technique"></textarea></div><div class="field"><label>Common Mistakes (one item per line)</label><textarea name="commonMistakes"></textarea></div></div>
-        <div class="field" style="margin-top:12px"><label>Notes</label><textarea name="notes"></textarea></div>
-        <div class="field" style="margin-top:12px"><label>Tags (comma separated)</label><input name="tags"></div>
-        <div class="form-actions"><button class="btn small" type="submit">Add to Library</button></div>
-      </form>
-    </div>`;
-}
-
-function renderLog(){
-  const panel = document.getElementById('logPanel');
-  const current = new Date();
-  current.setMonth(current.getMonth() + ui.monthOffset);
-  const y = current.getFullYear();
-  const m = current.getMonth();
-  const first = new Date(y, m, 1);
-  const last = endOfMonth(current);
-  const monthName = current.toLocaleDateString(undefined, {month:'long', year:'numeric'});
-  const weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const startPad = first.getDay();
-  const days = [];
-  for(let i=0;i<startPad;i++) days.push(null);
-  for(let d=1;d<=last.getDate();d++) days.push(new Date(y,m,d));
-  while(days.length % 7 !== 0) days.push(undefined);
-  const monthDates = days.filter(Boolean).map(isoFromDate);
-  const dayStatuses = monthDates.map(date => getDayStatus(date)).filter(Boolean);
-  const stats = dayStatuses.reduce((acc, status) => { if(status==='full') acc.full++; else if(status==='partial') acc.partial++; else acc.none++; return acc; }, {full:0,partial:0,none:0});
-  const streak = calcStreak();
-  const selectedSessions = getDaySessions(ui.selectedLogDate);
-
-  panel.innerHTML = `
-    <div class="card">
-      <div class="calendar-toolbar">
-        <div><h2 class="section-title">Log — ${monthName}</h2><div class="subtle">Track completion across your named routines, review past days, and export everything as CSV.</div></div>
-        <div class="inline-actions"><button class="btn secondary small" type="button" data-month-nav="-1">Previous</button><button class="btn secondary small" type="button" data-month-nav="0">Current</button><button class="btn secondary small" type="button" data-month-nav="1">Next</button><button class="btn small" type="button" data-export-csv>Export Log as CSV</button></div>
-      </div>
-      <div class="stats" style="margin-top:12px"><div class="stat"><div class="muted">Full completion</div><div class="num">${stats.full}</div></div><div class="stat"><div class="muted">Partial completion</div><div class="num">${stats.partial}</div></div><div class="stat"><div class="muted">No completion</div><div class="num">${stats.none}</div></div><div class="stat"><div class="muted">Current streak</div><div class="num">${streak}</div></div></div>
-      <div class="calendar-grid" aria-label="Monthly calendar" style="margin-top:14px">
-        ${weekdays.map(w => `<div class="day-head">${w}</div>`).join('')}
-        ${days.map(d => {
-          if(d===null || d===undefined) return `<div class="day-cell empty"></div>`;
-          const iso = isoFromDate(d); const status = getDayStatus(iso); const cls = status || 'empty';
-          let body = status ? `<div class="muted">${status==='full'?'Full':status==='partial'?'Partial':'None'}</div>` : `<div class="muted">No log</div>`;
-          const sessions = getDaySessions(iso);
-          if(sessions.length>1) body += `<div class="muted" style="margin-top:4px">${sessions.length} routines</div>`;
-          const selectedClass = ui.selectedLogDate===iso ? 'style="outline:3px solid var(--focus);outline-offset:1px"' : '';
-          return `<div class="day-cell ${cls}" data-day="${iso}" ${selectedClass}><div class="date">${d.getDate()}</div>${body}</div>`;
-        }).join('')}
-      </div>
-      <div class="selected-log">
-        <div class="row spaced"><h3 class="section-title">Selected Day: ${escapeHtml(ui.selectedLogDate)}</h3><span class="chip">${selectedSessions.length ? `${selectedSessions.length} routine${selectedSessions.length===1?'':'s'}` : 'No log'}</span></div>
-        ${selectedSessions.length ? selectedSessions.map(renderSelectedLog).join('<div style="height:10px"></div>') : `<div class="subtle">No routine was logged for this date.</div>`}
-      </div>
-      <div class="section-block" style="margin-top:14px"><h3 class="section-title">Clear Old Logs</h3><div class="row"><div style="min-width:220px" class="field"><label for="monthsToKeep">Keep last N months</label><input id="monthsToKeep" type="number" min="1" step="1" value="6"></div><button class="btn danger small" type="button" data-clear-logs>Clear Old Logs</button></div><div class="footer-note">This keeps recent logged days and removes older routine sessions from localStorage.</div></div>
-    </div>`;
-}
-
-function renderSelectedLog(routine){
-  const lines = routine.exercises.map(entry => {
-    const ex = getExerciseById(entry.exerciseId); const done=(entry.completed||[]).filter(Boolean).length; const total=entry.sets||0;
-    return `<li style="margin-bottom:10px"><strong>${escapeHtml(ex?ex.name:'Unknown exercise')}</strong><div class="muted">${total} sets, ${entry.reps||0} reps${entry.holdDuration?`, ${entry.holdDuration}s hold${entry.holdRep?` on rep ${entry.holdRep}`:''}`:''} — ${done}/${total} sets completed</div></li>`;
-  }).join('');
-  return `<div class="row" style="margin-bottom:8px"><span class="chip ${routine.completionStatus==='full'?'stretch':routine.completionStatus==='partial'?'phase2':'avoid'}">${routine.completionStatus}</span><span class="chip">${escapeHtml(routine.routineName||'Routine')}</span></div><ul style="margin:0 0 0 18px;padding:0">${lines||'<li>No exercises in this routine.</li>'}</ul>${routine.notes?`<div style="margin-top:10px"><strong>Notes:</strong> ${escapeHtml(routine.notes)}</div>`:''}`;
-}
-
-function calcStreak(){
-  let count=0; let d=new Date();
-  while(true){ const iso=isoFromDate(d); if(getDayStatus(iso)==='full') count++; else break; d.setDate(d.getDate()-1); }
-  return count;
-}
-
-function onTodayChange(e){
-  const select = e.target.closest('[data-active-routine]');
-  if(select){
-    const id = select.value;
-    if(state.routineTemplates[id]){ state.activeRoutineId=id; ensureRoutineSession(todayISO(), id); persist(false); renderToday(); updateTabBadge(); }
-    return;
-  }
-  const cb = e.target.closest('input[type="checkbox"][data-today-date]');
-  if(!cb) return;
-  const routine = getRoutine(cb.dataset.todayDate, cb.dataset.routineId || state.activeRoutineId);
-  const item = routine.exercises.find(x => x.exerciseId === cb.dataset.exerciseId);
-  if(!item) return;
-  item.completed[Number(cb.dataset.setIndex)] = cb.checked;
-  routine.completionStatus = computeCompletionStatus(routine);
-  persist(false); renderToday(); renderLog(); updateTabBadge();
-}
-
-function onEditInput(e){
-  if(e.target.id === 'routineNameInput') return;
-}
-
-function onEditChange(e){
-  if(e.target.id === 'newRoutineSource'){
-    const wrap=document.getElementById('newRoutineSourceWrap');
-    if(wrap) wrap.style.display=e.target.value==='existing' ? 'flex' : 'none';
-    return;
-  }
-  const routineSelect = e.target.closest('[data-select-routine]');
-  if(routineSelect){
-    if(state.routineTemplates[routineSelect.value]){ state.activeRoutineId=routineSelect.value; ensureRoutineSession(todayISO(), state.activeRoutineId); persist(false); renderEdit(); renderToday(); updateTabBadge(); }
-    return;
-  }
-  const field = e.target.closest('[data-routine-field]');
-  if(!field) return;
-  const idx = Number(field.dataset.index); const routine = getRoutine(todayISO(), state.activeRoutineId); const item=routine.exercises[idx]; if(!item) return;
-  const key=field.dataset.routineField;
-  if(key==='sets'){ const newSets=Math.max(1,Number(field.value||1)); const old=item.completed||[]; item.sets=newSets; item.completed=Array.from({length:newSets},(_,i)=>Boolean(old[i])); }
-  else if(key==='reps') item.reps=Math.max(0,Number(field.value||0));
-  else if(key==='hasHold'){ if(field.value==='yes'){ if(!item.holdDuration)item.holdDuration=30; if(item.holdRep==null)item.holdRep=item.reps||1; } else { item.holdDuration=0; item.holdRep=null; } }
-  else if(key==='holdDuration') item.holdDuration=Math.max(0,Number(field.value||0));
-  else if(key==='holdRep'){ const v=Number(field.value); item.holdRep=Number.isFinite(v)&&v>0?v:null; }
-  replaceActiveTemplateFromRoutine(routine); routine.completionStatus=computeCompletionStatus(routine); persist(false); renderEdit(); renderToday(); updateTabBadge();
-}
-
-function onEditSubmit(e){
-  const form=e.target.closest('#addExerciseForm'); if(!form) return; e.preventDefault();
-  const ex=readExerciseForm(form); ex.category=normalizeCategory(ex.category);
-  if(!ex.name.trim()) return toast('Name is required.',true); if(!ex.category) return toast('Category is required.',true); if(!ex.description.trim()) return toast('Description is required.',true);
-  const existsIdx=state.exercises.findIndex(x=>x.id===ex.id); if(existsIdx>=0){state.exercises[existsIdx]=ex;toast('Exercise updated')} else {state.exercises.unshift(ex);toast('Exercise added')}
-  persist(false); form.reset(); renderAll();
-}
-
-function onLibrarySearch(e){
-  if(e.target.id === 'librarySearch'){
-    const input = e.target;
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? start;
-    ui.search = input.value;
-    renderLibrary();
-    const nextInput = document.getElementById('librarySearch');
-    if(nextInput){
-      nextInput.focus();
-      try { nextInput.setSelectionRange(start, end); } catch(err) {}
+      `;
+      container.innerHTML = html;
     }
-  }
-}
 
-function onLogClick(e){
-  const day = e.target.closest('[data-day]');
-  if(day){
-    ui.selectedLogDate = day.dataset.day;
-    renderLog();
-    return;
-  }
-  const nav = e.target.closest('[data-month-nav]');
-  if(nav){
-    const val = Number(nav.dataset.monthNav);
-    ui.monthOffset = val === 0 ? 0 : ui.monthOffset + val;
-    renderLog();
-    return;
-  }
-  if(e.target.closest('[data-export-csv]')){ exportCsv(); return; }
-  if(e.target.closest('[data-clear-logs]')){ clearOldLogs(); return; }
-}
+    function renderLog() {
+      const container = document.getElementById('logContent');
+      const now = new Date();
+      now.setMonth(now.getMonth() + (ui.monthOffset || 0));
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-function clearOldLogs(){
-  const months=Math.max(1,Number(document.getElementById('monthsToKeep').value||6)); const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-months); const cutoffIso=isoFromDate(cutoff); let removed=0;
-  Object.keys(state.routines).forEach(key=>{ const r=state.routines[key]; if(r?.date && r.date<cutoffIso){delete state.routines[key];removed++;} });
-  persist(false); toast(`Removed ${removed} old routine session(s).`); renderLog();
-}
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-function exportCsv(){
-  const rows=[['Date','Routine','Exercise','Category','Sets','Reps','Hold Duration (sec)','Hold Rep','Completed Sets','Completion Status','Notes']];
-  Object.values(state.routines).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(routine=>{
-    (routine.exercises||[]).forEach(entry=>{ const ex=getExerciseById(entry.exerciseId)||{}; const done=(entry.completed||[]).filter(Boolean).length; rows.push([routine.date,routine.routineName||'Routine',ex.name||'Unknown exercise',ex.category||'',entry.sets||0,entry.reps||0,entry.holdDuration||0,entry.holdRep==null?'':entry.holdRep,`${done}/${entry.sets||0}`,routine.completionStatus||computeCompletionStatus(routine),routine.notes||'']); });
-  });
-  const csv=rows.map(r=>r.map(csvEscape).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`pt-exercise-log-${todayISO()}.csv`; document.body.appendChild(a); a.click(); a.remove(); toast('CSV exported');
-}
+      let stats = { full: 0, partial: 0, none: 0 };
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let days = [];
 
-function onModalSubmit(e){
-  e.preventDefault();
-  const form = e.currentTarget;
-  const ex = readExerciseForm(form);
-  ex.category = normalizeCategory(ex.category);
-  if(!ex.name.trim()) return toast('Name is required.', true);
-  if(!ex.category) return toast('Category is required.', true);
-  if(!ex.description.trim()) return toast('Description is required.', true);
-  const existingIdx = state.exercises.findIndex(x => x.id === ex.id);
-  if(existingIdx >= 0){
-    state.exercises[existingIdx] = ex;
-    toast('Exercise updated');
-  }else{
-    state.exercises.unshift(ex);
-    toast('Exercise added');
-  }
-  persist(false);
-  closeModal();
-  renderAll();
-  if(document.getElementById('libraryManagerBackdrop').classList.contains('open')) renderLibraryManager();
-}
+      for(let i = 0; i < firstDayIndex; i++) days.push(null);
+      for(let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
 
-function readExerciseForm(form){
-  const data = new FormData(form);
-  const name = String(data.get('name') || '').trim();
-  const id = String(data.get('id') || '').trim() || slugify(name);
-  const category = String(data.get('category') || 'Strength');
-  const description = String(data.get('description') || '').trim();
-  const drillDown = {
-    whatToFeel: String(data.get('whatToFeel') || '').trim(),
-    technique: splitLines(data.get('technique')),
-    commonMistakes: splitLines(data.get('commonMistakes')),
-    progression: String(data.get('progression') || '').trim(),
-    notes: String(data.get('notes') || '').trim()
-  };
-  const tags = String(data.get('tags') || '').split(',').map(s => s.trim()).filter(Boolean);
-  return { id, name, category, description, drillDown, tags };
-}
+      function getDayStatus(iso) {
+        const sessions = Object.values(state.routines).filter(r => r.date === iso);
+        if(!sessions.length) return null;
+        if(sessions.every(s => s.completionStatus === 'full')) return 'full';
+        if(sessions.some(s => s.completionStatus === 'full' || s.completionStatus === 'partial')) return 'partial';
+        return 'none';
+      }
 
-function openModal(exerciseId){
-  // Edit/Add uses its own modal; close the manager first so the panes never stack.
-  closeLibraryManager();
-  const ex = exerciseId ? state.exercises.find(x => x.id === exerciseId) : null;
-  ui.editingId = ex ? ex.id : null;
-  const form = document.getElementById('exerciseModalForm');
-  form.reset();
-  document.getElementById('modalTitle').textContent = ex ? 'Edit Exercise' : 'Add Exercise';
-  form.elements.id.value = ex ? ex.id : '';
-  form.elements.name.value = ex ? ex.name : '';
-  form.elements.category.value = ex ? ex.category : 'Strength';
-  form.elements.description.value = ex ? ex.description : '';
-  form.elements.whatToFeel.value = ex?.drillDown?.whatToFeel || '';
-  form.elements.technique.value = ex?.drillDown?.technique?.join('\n') || '';
-  form.elements.commonMistakes.value = ex?.drillDown?.commonMistakes?.join('\n') || '';
-  form.elements.progression.value = ex?.drillDown?.progression || '';
-  form.elements.notes.value = ex?.drillDown?.notes || '';
-  form.elements.tags.value = ex?.tags?.join(', ') || '';
-  document.getElementById('modalBackdrop').classList.add('open');
-  document.getElementById('modalBackdrop').setAttribute('aria-hidden','false');
-  document.getElementById('modalName').focus();
-}
+      days.forEach(d => {
+        if(!d) return;
+        const status = getDayStatus(isoFromDate(d));
+        if(status === 'full') stats.full++;
+        else if(status === 'partial') stats.partial++;
+        else if(status === 'none') stats.none++;
+      });
 
-function closeModal(){
-  document.getElementById('modalBackdrop').classList.remove('open');
-  document.getElementById('modalBackdrop').setAttribute('aria-hidden','true');
-}
+      const streak = calcStreak();
+      const selectedISO = ui.selectedLogDate || todayISO();
+      const selectedSessions = Object.values(state.routines).filter(r => r.date === selectedISO);
 
-function onAddToRoutine(){
-  const select=document.getElementById('addExerciseSelect'); const exId=select.value; const routine=getRoutine(todayISO(), state.activeRoutineId);
-  if(routine.exercises.some(x=>x.exerciseId===exId)) return toast('That exercise is already in this routine.');
-  routine.exercises.push({exerciseId:exId,sets:3,reps:10,holdDuration:0,holdRep:null,completed:[false,false,false]});
-  replaceActiveTemplateFromRoutine(routine); routine.completionStatus=computeCompletionStatus(routine); persist(false); toast(`Added to ${getActiveTemplate().name}`); renderEdit(); renderToday(); updateTabBadge();
-}
+      container.innerHTML = `
+        <div class="card">
+          <div class="calendar-toolbar">
+            <div>
+              <h2 class="section-title">Log — ${monthName}</h2>
+              <div class="subtle">Review completed routines and monthly frequency.</div>
+            </div>
+            <div class="row" style="gap: 6px; flex-wrap: wrap;">
+              <button class="btn secondary small" type="button" data-month-nav="-1">Previous</button>
+              <button class="btn secondary small" type="button" data-month-nav="0">Current</button>
+              <button class="btn secondary small" type="button" data-month-nav="1">Next</button>
+              <button class="btn small" type="button" data-export-csv>Export CSV</button>
+            </div>
+          </div>
 
-function onSaveRoutine(){
-  const routine=getRoutine(todayISO(), state.activeRoutineId); if(!routine.exercises.length) return toast('Add at least one exercise before saving.',true);
-  replaceActiveTemplateFromRoutine(routine); applyTemplateToToday(); persist(true); toast(`${getActiveTemplate().name} saved`); renderEdit(); renderToday();
-}
+          <div class="stats" style="margin-top: 14px;">
+            <div class="stat"><div class="muted">Full</div><div class="num">${stats.full}</div></div>
+            <div class="stat"><div class="muted">Partial</div><div class="num">${stats.partial}</div></div>
+            <div class="stat"><div class="muted">None</div><div class="num">${stats.none}</div></div>
+            <div class="stat"><div class="muted">Streak</div><div class="num">${streak}</div></div>
+          </div>
 
-function createRoutineFromBuilder(){
-  const name = String(document.getElementById('newRoutineName')?.value || '').trim();
-  if(!name) return toast('Routine name is required.', true);
-  const sourceMode = document.getElementById('newRoutineSource')?.value || 'blank';
-  const sourceId = document.getElementById('newRoutineSourceId')?.value || null;
-  if(sourceMode === 'existing' && sourceId && !state.routineTemplates[sourceId]) return toast('Choose an existing routine.', true);
-  const base='routine-'+slugify(name); let id=base, n=2; while(state.routineTemplates[id]) id=`${base}-${n++}`;
-  const source = sourceMode === 'existing' ? state.routineTemplates[sourceId] : null;
-  state.routineTemplates[id]={
-    id,
-    name,
-    exercises: source ? source.exercises.map(e => ({...e})) : [],
-    createdAt:new Date().toISOString(),
-    updatedAt:new Date().toISOString()
-  };
-  state.activeRoutineId=id;
-  ensureRoutineSession(todayISO(),id);
-  persist(false);
-  toast(source ? 'Routine created from existing routine' : 'Routine created');
-  renderAll();
-  document.getElementById('newRoutineName').value='';
-  document.getElementById('newRoutineSource').value='blank';
-  const wrap=document.getElementById('newRoutineSourceWrap'); if(wrap) wrap.style.display='none';
-}
-function renameRoutine(){
-  const input=document.getElementById('routineNameInput'); const name=String(input?.value||'').trim(); if(!name) return toast('Routine name is required.',true);
-  const r=getActiveTemplate(); r.name=name; r.updatedAt=new Date().toISOString(); getRoutine(todayISO()).routineName=name; persist(false); toast('Routine name saved'); renderAll();
-}
+          <div class="calendar-grid" style="margin-top: 14px;">
+            ${weekdays.map(w => `<div class="day-head">${w}</div>`).join('')}
+            ${days.map(d => {
+              if(!d) return `<div class="day-cell empty"></div>`;
+              const iso = isoFromDate(d);
+              const status = getDayStatus(iso);
+              const cls = status || 'empty';
+              const selectedStyle = ui.selectedLogDate === iso ? 'outline: 2px solid var(--focus);' : '';
+              return `
+                <div class="day-cell ${cls}" data-day="${iso}" style="${selectedStyle}">
+                  <div class="date">${d.getDate()}</div>
+                  ${status ? `<div class="muted" style="font-size:0.75rem; text-transform:capitalize; margin-top:2px;">${status}</div>` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
 
-function deleteActiveRoutine(){
-  if(Object.keys(state.routineTemplates).length<=1) return toast('Keep at least one routine.',true);
-  const r=getActiveTemplate(); if(!confirm(`Delete the routine "${r.name}"? Its historical logs will remain.`)) return;
-  const ids=Object.keys(state.routineTemplates).filter(id=>id!==r.id); delete state.routineTemplates[r.id]; state.activeRoutineId=ids[0]; ensureRoutineSession(todayISO(),state.activeRoutineId); persist(false); toast('Routine deleted'); renderAll();
-}
+          <div class="card" style="margin-top: 16px;">
+            <h3 class="section-title">Selected Day: ${escapeHtml(selectedISO)}</h3>
+            ${selectedSessions.length === 0 ? '<div class="subtle">No routine logged for this date.</div>' : selectedSessions.map(s => `
+              <div class="mini-box">
+                <strong>${escapeHtml(s.routineName)}</strong> — <span class="chip">${s.completionStatus}</span>
+              </div>
+            `).join('')}
+          </div>
 
-function onEditPanelClick(e){
-  if(e.target.closest('[data-create-routine]')){ createRoutineFromBuilder(); return; }
-  if(e.target.closest('[data-rename-routine]')){ renameRoutine(); return; }
-  if(e.target.closest('[data-delete-routine]')){ deleteActiveRoutine(); return; }
-  const rem=e.target.closest('[data-remove-routine]');
-  if(rem){ const idx=Number(rem.dataset.removeRoutine); const routine=getRoutine(todayISO(), state.activeRoutineId); routine.exercises.splice(idx,1); replaceActiveTemplateFromRoutine(routine); routine.completionStatus=computeCompletionStatus(routine); persist(false); renderEdit(); renderToday(); updateTabBadge(); return; }
-  if(e.target.closest('[data-add-to-routine]')){onAddToRoutine();return;}
-  if(e.target.closest('[data-save-routine]')){onSaveRoutine();return;}
-}
+          <!-- JSON Backup & Restore Card -->
+          <div class="card" style="margin-top: 16px; background: rgba(255,255,255,.02);">
+            <h3 class="section-title">App Data Backup & Restore</h3>
+            <p class="subtle" style="margin-bottom: 12px;">Export all your routines, custom exercises, and historical logs into a single backup file, or restore from a previous backup when switching devices or reinstalling iOS.</p>
+            <div class="row" style="gap: 10px; flex-wrap: wrap;">
+              <button class="btn small" type="button" onclick="exportJsonBackup()">Download JSON Backup</button>
+              <label class="btn secondary small" style="margin: 0; cursor: pointer; display: inline-flex; align-items: center;">
+                Restore JSON Backup
+                <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importJsonBackup(event)">
+              </label>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-function onLibraryPanelClick(e){
-  const manage = e.target.closest('[data-open-library-manager]');
-  if(manage){ openLibraryManager(); return; }
-  const editFromGuide = e.target.closest('[data-edit-from-guide]');
-  if(editFromGuide){ openModal(editFromGuide.dataset.editFromGuide); return; }
-  const toggle = e.target.closest('[data-library-toggle]');
-  if(!toggle) return;
-  const id = toggle.dataset.libraryToggle;
-  const wrap = document.getElementById(`libGuideWrap-${id}`);
-  if(wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-}
+    function calcStreak() {
+      let count = 0;
+      let d = new Date();
+      while(true) {
+        const iso = isoFromDate(d);
+        const sessions = Object.values(state.routines).filter(r => r.date === iso);
+        const hasFull = sessions.some(s => s.completionStatus === 'full');
+        if(hasFull) count++;
+        else if(count > 0) break;
+        else {
+          d.setDate(d.getDate() - 1);
+          const prevIso = isoFromDate(d);
+          const prevSessions = Object.values(state.routines).filter(r => r.date === prevIso);
+          if(!prevSessions.some(s => s.completionStatus === 'full')) break;
+          else continue;
+        }
+        d.setDate(d.getDate() - 1);
+      }
+      return count;
+    }
 
-function openLibraryManager(){
-  renderLibraryManager();
-  const backdrop = document.getElementById('libraryManagerBackdrop');
-  backdrop.classList.add('open');
-  backdrop.setAttribute('aria-hidden','false');
-}
-function closeLibraryManager(){
-  const backdrop = document.getElementById('libraryManagerBackdrop');
-  backdrop.classList.remove('open');
-  backdrop.setAttribute('aria-hidden','true');
-}
-function onLibraryManagerClick(e){
-  const editBtn = e.target.closest('[data-edit-ex]');
-  if(editBtn){ openModal(editBtn.dataset.editEx); return; }
-  const delBtn = e.target.closest('[data-delete-ex]');
-  if(delBtn){
-    const id = delBtn.dataset.deleteEx;
-    const ex = state.exercises.find(x=>x.id===id);
-    if(!ex) return;
-    if(!confirm(`Delete "${ex.name}" from the library?`)) return;
-    state.exercises = state.exercises.filter(x=>x.id!==id);
-    Object.values(state.routineTemplates).forEach(t=>t.exercises=t.exercises.filter(item=>item.exerciseId!==id));
-    Object.values(state.routines).forEach(r=>{r.exercises=r.exercises.filter(item=>item.exerciseId!==id); r.completionStatus=computeCompletionStatus(r);});
-    persist(false);
-    toast('Exercise deleted');
-    renderAll();
-    renderLibraryManager();
-  }
-}
-function onLibraryManagerSubmit(e){
-  const form=e.target.closest('#addExerciseForm');
-  if(!form) return;
-  e.preventDefault();
-  const ex=readExerciseForm(form); ex.category=normalizeCategory(ex.category);
-  if(!ex.name.trim()) return toast('Name is required.',true);
-  if(!ex.category) return toast('Category is required.',true);
-  if(!ex.description.trim()) return toast('Description is required.',true);
-  const existsIdx=state.exercises.findIndex(x=>x.id===ex.id);
-  if(existsIdx>=0) state.exercises[existsIdx]=ex;
-  else state.exercises.push(ex);
-  persist(false);
-  toast(existsIdx>=0 ? 'Exercise updated' : 'Exercise added');
-  renderAll();
-  renderLibraryManager();
-}
+    // JSON Backup & Restore Functions
+    function exportJsonBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `pt-tracker-backup-${todayISO()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      toast('Backup downloaded successfully');
+    }
 
-document.getElementById('editPanel').addEventListener('click', onEditPanelClick);
-document.getElementById('todayPanel').addEventListener('click', (e)=>{
-  const jump = e.target.closest('[data-jump-tab]');
-  if(jump){
-    ui.activeTab = jump.dataset.jumpTab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === ui.activeTab));
-    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(ui.activeTab === 'builder' ? 'editPanel' : `${ui.activeTab}Panel`).classList.add('active');
+    function importJsonBackup(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if(!parsed.exercises || !parsed.routineTemplates) {
+            throw new Error('Invalid backup file structure.');
+          }
+          state = parsed;
+          ui = state.ui || ui;
+          persist(false);
+          renderActive();
+          toast('Data successfully restored!');
+        } catch(err) {
+          toast('Failed to restore: Invalid backup file', true);
+        }
+        event.target.value = ''; // Reset file input
+      };
+      reader.readAsText(file);
+    }
+
+    // Event Handlers
+    document.addEventListener('change', e => {
+      const activeSelect = e.target.closest('[data-active-routine]');
+      if(activeSelect) {
+        state.activeRoutineId = activeSelect.value;
+        ensureRoutineSession(todayISO(), state.activeRoutineId);
+        persist(false);
+        renderToday();
+        updateTabBadge();
+        return;
+      }
+
+      const cb = e.target.closest('input[type="checkbox"][data-today-date]');
+      if(cb) {
+        const routine = getRoutine(cb.dataset.todayDate, cb.dataset.routineId || state.activeRoutineId);
+        const item = routine.exercises.find(x => x.exerciseId === cb.dataset.exerciseId);
+        if(item) {
+          item.completed[Number(cb.dataset.setIndex)] = cb.checked;
+          routine.completionStatus = computeCompletionStatus(routine);
+          persist(false);
+          renderToday();
+          updateTabBadge();
+        }
+        return;
+      }
+
+      const field = e.target.closest('[data-routine-field]');
+      if(field) {
+        const idx = Number(field.dataset.index);
+        const routine = getRoutine(todayISO(), state.activeRoutineId);
+        const item = routine.exercises[idx];
+        if(!item) return;
+        const key = field.dataset.routineField;
+        if(key === 'sets') {
+          const val = Math.max(1, Number(field.value || 1));
+          const old = item.completed || [];
+          item.sets = val;
+          item.completed = Array.from({length: val}, (_, i) => Boolean(old[i]));
+        } else if(key === 'reps') {
+          item.reps = Math.max(0, Number(field.value || 0));
+        } else if(key === 'holdDuration') {
+          item.holdDuration = Math.max(0, Number(field.value || 0));
+        }
+        replaceActiveTemplateFromRoutine(routine);
+        routine.completionStatus = computeCompletionStatus(routine);
+        persist(false);
+        renderEdit();
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if(e.target.closest('[data-month-nav]')) {
+        const val = Number(e.target.closest('[data-month-nav]').dataset.monthNav);
+        ui.monthOffset = val === 0 ? 0 : (ui.monthOffset || 0) + val;
+        renderLog();
+        return;
+      }
+      const dayCell = e.target.closest('[data-day]');
+      if(dayCell) {
+        ui.selectedLogDate = dayCell.dataset.day;
+        renderLog();
+        return;
+      }
+      if(e.target.closest('[data-export-csv]')) {
+        exportCsv();
+        return;
+      }
+      if(e.target.closest('[data-rename-routine]')) {
+        const input = document.getElementById('routineNameInput');
+        const name = String(input?.value || '').trim();
+        if(!name) return toast('Routine name is required', true);
+        const t = getActiveTemplate();
+        t.name = name;
+        t.updatedAt = new Date().toISOString();
+        getRoutine(todayISO()).routineName = name;
+        persist(true);
+        renderEdit();
+        return;
+      }
+      if(e.target.closest('[data-delete-routine]')) {
+        if(Object.keys(state.routineTemplates).length <= 1) return toast('Keep at least one routine', true);
+        const t = getActiveTemplate();
+        if(!confirm(`Delete routine "${t.name}"?`)) return;
+        delete state.routineTemplates[t.id];
+        state.activeRoutineId = Object.keys(state.routineTemplates)[0];
+        ensureRoutineSession(todayISO(), state.activeRoutineId);
+        persist(true);
+        renderEdit();
+        renderToday();
+        return;
+      }
+      if(e.target.closest('[data-create-routine]')) {
+        const name = String(document.getElementById('newRoutineName')?.value || '').trim();
+        if(!name) return toast('Routine name required', true);
+        const sourceMode = document.getElementById('newRoutineSource')?.value;
+        const sourceId = document.getElementById('newRoutineSourceId')?.value;
+        const base = slugify(name);
+        let id = base, n = 2;
+        while(state.routineTemplates[id]) id = `${base}-${n++}`;
+        const source = sourceMode === 'existing' ? state.routineTemplates[sourceId] : null;
+        state.routineTemplates[id] = {
+          id, name,
+          exercises: source ? source.exercises.map(ex => ({...ex, completed: Array.from({length:ex.sets},()=>false)})) : [],
+          createdAt: new Date().toISOString()
+        };
+        state.activeRoutineId = id;
+        ensureRoutineSession(todayISO(), id);
+        persist(true);
+        renderEdit();
+        renderToday();
+        toast('Routine created');
+        return;
+      }
+      if(e.target.closest('[data-add-to-routine]')) {
+        const select = document.getElementById('addExerciseSelect');
+        const exId = select?.value;
+        if(!exId) return;
+        const routine = getRoutine(todayISO(), state.activeRoutineId);
+        if(routine.exercises.some(x => x.exerciseId === exId)) return toast('Exercise already in routine');
+        routine.exercises.push({ exerciseId: exId, sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] });
+        replaceActiveTemplateFromRoutine(routine);
+        persist(true);
+        renderEdit();
+        toast('Added to routine');
+        return;
+      }
+      const rem = e.target.closest('[data-remove-routine]');
+      if(rem) {
+        const idx = Number(rem.dataset.removeRoutine);
+        const routine = getRoutine(todayISO(), state.activeRoutineId);
+        routine.exercises.splice(idx, 1);
+        replaceActiveTemplateFromRoutine(routine);
+        persist(true);
+        renderEdit();
+        return;
+      }
+    });
+
+    function onLibrarySearch(e) {
+      const input = e.target;
+      const start = input.selectionStart;
+      ui.search = input.value;
+      renderLibrary();
+      const next = document.getElementById('librarySearch');
+      if(next) {
+        next.focus();
+        try { next.setSelectionRange(start, start); } catch(err) {}
+      }
+    }
+
+    function openModal(id) {
+      const ex = id ? state.exercises.find(x => x.id === id) : null;
+      const form = document.getElementById('exerciseModalForm');
+      form.reset();
+      document.getElementById('modalTitle').textContent = ex ? 'Edit Exercise' : 'Add Exercise';
+      form.elements.id.value = ex ? ex.id : '';
+      form.elements.name.value = ex ? ex.name : '';
+      form.elements.category.value = ex ? ex.category : 'Strength';
+      form.elements.description.value = ex ? ex.description : '';
+      form.elements.whatToFeel.value = ex?.drillDown?.whatToFeel || '';
+      form.elements.technique.value = ex?.drillDown?.technique?.join('\n') || '';
+      form.elements.commonMistakes.value = ex?.drillDown?.commonMistakes?.join('\n') || '';
+      form.elements.progression.value = ex?.drillDown?.progression || '';
+      form.elements.notes.value = ex?.drillDown?.notes || '';
+      form.elements.tags.value = ex?.tags?.join(', ') || '';
+      document.getElementById('modalBackdrop').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.remove('open');
+    }
+
+    function onModalSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const idVal = form.elements.id.value;
+      const name = form.elements.name.value.trim();
+      if(!name) return toast('Name is required', true);
+
+      const ex = {
+        id: idVal || slugify(name),
+        name,
+        category: normalizeCategory(form.elements.category.value),
+        description: form.elements.description.value.trim(),
+        tags: form.elements.tags.value.split(',').map(s => s.trim()).filter(Boolean),
+        drillDown: {
+          whatToFeel: form.elements.whatToFeel.value.trim(),
+          technique: form.elements.technique.value.split('\n').map(s => s.trim()).filter(Boolean),
+          commonMistakes: form.elements.commonMistakes.value.split('\n').map(s => s.trim()).filter(Boolean),
+          progression: form.elements.progression.value.trim(),
+          notes: form.elements.notes.value.trim()
+        }
+      };
+
+      const existingIdx = state.exercises.findIndex(x => x.id === ex.id);
+      if(existingIdx >= 0) state.exercises[existingIdx] = ex;
+      else state.exercises.unshift(ex);
+
+      persist(true);
+      closeModal();
+      renderLibrary();
+      renderToday();
+    }
+
+    function exportCsv() {
+      let csv = 'Date,Routine,Exercise,Set,Completed\n';
+      Object.values(state.routines).forEach(r => {
+        r.exercises.forEach(item => {
+          const ex = state.exercises.find(x => x.id === item.exerciseId);
+          const name = ex ? ex.name : item.exerciseId;
+          item.completed.forEach((done, sIdx) => {
+            csv += `"${r.date}","${r.routineName}","${name}",${sIdx + 1},${done}\n`;
+          });
+        });
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pt-tracker-log-${todayISO()}.csv`;
+      a.click();
+    }
+
+    function updateTabBadge() {
+      const today = getRoutine(todayISO());
+      const completed = (today.exercises || []).reduce((s, ex) => s + (ex.completed || []).filter(Boolean).length, 0);
+      const total = (today.exercises || []).reduce((s, ex) => s + (ex.sets || 0), 0);
+      const btn = document.querySelector('.tab-btn[data-tab="today"]');
+      if(btn) btn.textContent = total ? `Today (${completed}/${total})` : 'Today';
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     renderActive();
-    return;
-  }
-  const guideBtn = e.target.closest('[data-today-guide]');
-  if(guideBtn){
-    const wrap = document.getElementById(`todayGuide-${guideBtn.dataset.todayGuide}`);
-    if(wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-  }
-});
-
-function updateTabBadge(){
-  const today=getRoutine(todayISO());
-  const completed=(today.exercises||[]).reduce((s,ex)=>s+(ex.completed||[]).filter(Boolean).length,0);
-  const total=(today.exercises||[]).reduce((s,ex)=>s+(ex.sets||0),0);
-  const todayBtn=document.querySelector('.tab-btn[data-tab="today"]');
-  todayBtn.textContent=total ? `Today (${completed}/${total})` : 'Today';
-}
-updateTabBadge();
-</script>
+  </script>
 </body>
 </html>
