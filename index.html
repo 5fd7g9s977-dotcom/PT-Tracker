@@ -3,478 +3,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PT Exercise Tracker v1.7</title>
+<title>PT Exercise Tracker v1.13</title>
 <style>
-/* --- PT Tracker v1.7: Solid Background, Unified Purple Accents & Cleaned Header --- */
-:root {
-  --bg: #1a1628;
-  --panel: #252037;
-  --text: #f4f1fc;
-  --muted: #ded8ec;
-  --line: rgba(255,255,255,.14);
-  --shadow: 0 14px 34px rgba(9,7,18,.35);
-  --chip: #342c4b;
-  --focus: #a894ff;
-  --purple-primary: #7562e0;
-  --purple-hover: #6350cd;
-  --danger-bg: #c94f68;
-}
+  :root {
+    --bg: #211d31;
+    --panel: #2a263d;
+    --text: #eeeaff;
+    --muted: #a9a2bd;
+    --line: rgba(255,255,255,.10);
+    --shadow: 0 14px 34px rgba(9,7,18,.24);
+    --chip: #332d49;
+    --focus: #9a82ff;
+    --navy: #f0ebff;
+    --purple: #8e7bff;
+    --indigo: #6f80ee;
+  }
 
-html, body {
-  background: #1a1628;
-  color: var(--text);
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  margin: 0;
-  padding: 0;
-}
+  html, body {
+    background: radial-gradient(circle at 15% 0%, #342750 0%, #211d31 38%, #1d1a2a 100%);
+    color: var(--text);
+    font-family: Verdana, Calibri, system-ui, sans-serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 16px;
+    max-width: 960px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
 
-body {
-  padding: 16px;
-  max-width: 900px;
-  margin: 0 auto;
-}
+  header.app-header {
+    background: linear-gradient(180deg, rgba(35,30,52,.96), rgba(35,30,52,.84));
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 16px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-header.app-header {
-  background: #252037;
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  padding: 16px;
-  border-radius: 12px 12px 0 0;
-}
+  .title-wrap h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #f2ecff;
+    font-size: 1.3rem;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+  .title-wrap p { color: #aaa2bc; margin: 4px 0 0 0; font-size: 0.9rem; }
 
-.title-wrap h1 {
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  color: #ffffff;
-  font-size: 1.35rem;
-  margin: 0;
-  font-weight: 700;
-}
+  nav.tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
 
-nav.tabs {
-  display: flex;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,.1);
-  margin-bottom: 16px;
-  overflow-x: auto;
-}
+  nav.tabs .tab-btn {
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.10);
+    color: #c8c1d9;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-nav.tabs .tab-btn {
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.14);
-  color: var(--muted);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  font-weight: 500;
-  white-space: nowrap;
-}
+  nav.tabs .tab-btn.active {
+    background: linear-gradient(135deg, #7662e8, #5f71dc);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(96,88,220,.22);
+  }
 
-nav.tabs .tab-btn.active {
-  background: var(--purple-primary);
-  border-color: transparent;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(117,98,224,.3);
-}
+  .panel { display: none; }
+  .panel.active { display: block; }
 
-.panel {
-  display: none;
-}
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.028));
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
 
-.panel.active {
-  display: block;
-}
+  h2, h3, h4, .section-title { font-family: Georgia, 'Times New Roman', serif; color: #f0eaff; margin-top: 0; }
+  .subtle, .muted, .helper, .footer-note { color: #aaa2bc; }
 
-.card, .routine-item, .routine-builder-item, .exercise-card, .selected-log, .stat, .modal {
-  background: #252037;
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow);
-}
+  .btn {
+    background: linear-gradient(135deg, #7764e7, #5f72dc);
+    border: none; border-radius: 6px;
+    padding: 8px 16px; color: #ffffff;
+    font-weight: 600; cursor: pointer;
+    box-shadow: 0 7px 16px rgba(96,88,220,.20);
+    -webkit-appearance: none;
+  }
+  .btn.secondary {
+    background: rgba(255,255,255,.055);
+    color: #e6e1f0;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: none;
+  }
+  .btn.danger { background: linear-gradient(135deg, #c94f68, #a93c56); }
+  .btn.small { padding: 4px 10px; font-size: 0.85rem; }
 
-h2, h3, h4, .section-title, .routine-name, .exercise-head h4 {
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  color: #ffffff;
-  font-weight: 700;
-  margin-top: 0;
-}
+  input, select, textarea {
+    background: rgba(255,255,255,.045);
+    color: #f0edf7;
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 8px; border-radius: 6px;
+    width: 100%; box-sizing: border-box;
+    margin-top: 4px; margin-bottom: 10px;
+  }
+  input::placeholder, textarea::placeholder { color: #857e99; }
+  label { color: #d9d3e4; font-weight: 600; display: block; margin-bottom: 2px; }
 
-.subtle, .muted, .helper, .footer-note, .exercise-desc {
-  color: var(--muted);
-}
+  .exercise-card, .routine-item, .routine-builder-item {
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.10);
+    border-left: 4px solid #6e68d9;
+    border-radius: 8px; padding: 12px; margin-bottom: 10px;
+  }
+  .routine-item { border-left-color: #8170eb; }
+  .routine-builder-item { border-left-color: #5f72dc; }
 
-.btn {
-  background: var(--purple-primary);
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  color: #ffffff;
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 7px 16px rgba(117,98,224,.28);
-}
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.11);
+    color: #d8d2e8;
+    margin-right: 6px;
+  }
+  .chip.warn { background: rgba(220,82,102,.13); border-color: rgba(220,82,102,.38); color: #ff9bad; }
+  
+  .set-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .set-box { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  
+  /* Calendar Styles */
+  .calendar-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .day-head { text-align: center; font-weight: bold; background: rgba(255,255,255,.055); color: #d7d0e5; padding: 6px; border-radius: 4px; font-size: 0.85rem; }
+  .day-cell { background: rgba(255,255,255,.032); border: 1px solid rgba(255,255,255,.10); min-height: 75px; padding: 6px; border-radius: 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+  .day-cell.empty { background: transparent; border: none; cursor: default; }
+  .day-cell.full { background: rgba(21,154,107,.14); border-color: rgba(91,220,163,.28); }
+  .day-cell.partial { background: rgba(210,169,45,.13); border-color: rgba(239,206,104,.28); }
+  .day-cell.none { background: rgba(154,99,232,.07); border-color: rgba(154,99,232,.16); }
+  .day-cell .date { font-weight: bold; font-size: 0.9rem; }
+  
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.10); padding: 10px; border-radius: 8px; text-align: center; }
+  .stat .num { font-size: 1.4rem; font-weight: bold; color: #f0eaff; margin-top: 4px; }
 
-.btn:hover {
-  background: var(--purple-hover);
-}
-
-.btn.secondary {
-  background: rgba(255,255,255,.075);
-  color: #ffffff;
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: none;
-}
-
-.btn.danger {
-  background: var(--danger-bg);
-  box-shadow: 0 7px 16px rgba(201,79,104,.28);
-}
-
-.btn.small {
-  padding: 5px 10px;
-  font-size: 0.85rem;
-}
-
-input, select, textarea {
-  background: #1a1628;
-  color: #ffffff;
-  border: 1px solid rgba(255,255,255,.18);
-  padding: 8px;
-  border-radius: 6px;
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-input::placeholder, textarea::placeholder {
-  color: #b5adc9;
-}
-
-label {
-  color: #f0ebff;
-  font-family: Verdana, Calibri, system-ui, -apple-system, sans-serif;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.chip {
-  background: var(--chip);
-  border: 1px solid rgba(255,255,255,.12);
-  color: #d8d2e8;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  display: inline-block;
-}
-
-.routine-item { border-left: 4px solid var(--purple-primary); }
-.exercise-card { border-left: 4px solid #8e7ff2; }
-
-.set-box {
-  padding: 6px 10px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 6px;
-  color: #ddd7e9;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-right: 6px;
-  margin-bottom: 6px;
-}
-
-.set-box input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--purple-primary);
-}
-
-.mini-box {
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.1);
-  padding: 10px;
-  border-radius: 6px;
-  margin-top: 8px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.stat {
-  background: #252037;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,.12);
-}
-
-.stat .num {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-top: 4px;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-
-.day-head {
-  text-align: center;
-  font-weight: 700;
-  color: var(--muted);
-  padding: 6px 0;
-  font-size: 0.85rem;
-}
-
-.day-cell {
-  background: rgba(255,255,255,.032);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 6px;
-  min-height: 65px;
-  padding: 6px;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-.day-cell.empty {
-  background: transparent;
-  border: none;
-  cursor: default;
-}
-
-.day-cell .date {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #ffffff;
-}
-
-.day-cell.full {
-  background: rgba(21,154,107,.14);
-  border-color: rgba(91,220,163,.28);
-}
-
-.day-cell.partial {
-  background: rgba(210,169,45,.13);
-  border-color: rgba(239,206,104,.28);
-}
-
-.day-cell.none {
-  background: rgba(154,99,232,.07);
-  border-color: rgba(154,99,232,.16);
-}
-
-.modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(8,7,15,.78);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.modal-backdrop.open {
-  display: flex;
-}
-
-.modal {
-  background: #17152a !important;
-  color: #f0ebff;
-  border: 1px solid rgba(255,255,255,.12);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #171322;
-  color: #f7f3ff;
-  border: 1px solid rgba(255,255,255,.15);
-  padding: 10px 16px;
-  border-radius: 8px;
-  z-index: 1100;
-  box-shadow: 0 10px 25px rgba(0,0,0,.4);
-  display: none;
-}
-
-.row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.row.spaced {
-  justify-content: space-between;
-}
-
-.calendar-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-details.guide {
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin-top: 8px;
-}
-
-details.guide summary {
-  color: #ece7f5;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.guide-body {
-  color: #c4bdd0;
-  margin-top: 8px;
-  font-size: 0.9rem;
-}
+  .selected-log { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.10); padding: 12px; border-radius: 8px; margin-top: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row.spaced { justify-content: space-between; }
+  
+  /* Modal */
+  .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8,7,15,.78); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; box-sizing: border-box; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #17152a !important; color: #f0ebff; border: 1px solid rgba(255,255,255,.12); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+  
+  .toast { position: fixed; bottom: 20px; right: 20px; background: #171322; color: #f7f3ff; border: 1px solid rgba(255,255,255,.08); padding: 10px 16px; border-radius: 6px; z-index: 2000; box-shadow: var(--shadow); opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-
   <header class="app-header">
     <div class="title-wrap">
-      <h1>PT Exercise Tracker v1.7</h1>
+      <h1>PT Exercise Tracker</h1>
+      <p>Physical Therapy Recovery &amp; Routine Tracker</p>
     </div>
   </header>
-  
+
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Today</button>
-    <button class="tab-btn" data-tab="builder" onclick="switchTab('builder')">Routine Builder</button>
-    <button class="tab-btn" data-tab="library" onclick="switchTab('library')">Library</button>
-    <button class="tab-btn" data-tab="log" onclick="switchTab('log')">Log</button>
+    <button class="tab-btn active" type="button" data-tab="today" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" type="button" data-tab="library" onclick="switchTab('library')">Library</button>
+    <button class="tab-btn" type="button" data-tab="builder" onclick="switchTab('builder')">Routine Builder</button>
+    <button class="tab-btn" type="button" data-tab="log" onclick="switchTab('log')">Log &amp; Calendar</button>
   </nav>
 
   <main>
-    <!-- Today Panel -->
+    <!-- TODAY PANEL -->
     <section id="todayPanel" class="panel active">
-      <div class="card">
-        <h2>Today's Routine</h2>
-        <p class="subtle">Select active routine, perform sets, and review guidance seamlessly.</p>
-        <div id="todayContent" style="margin-top: 14px;">Loading routine data...</div>
+      <div class="card today-head">
+        <div class="row spaced" style="margin-bottom: 12px;">
+          <div>
+            <h2 id="todayTitle">Today's Routine</h2>
+            <div class="subtle" id="todayDateStr"></div>
+          </div>
+          <div>
+            <label for="activeRoutineSelect" class="subtle" style="font-size:0.8rem">Switch Routine</label>
+            <select id="activeRoutineSelect" data-active-routine style="margin:0; width:180px;"></select>
+          </div>
+        </div>
+        <div id="todayRoutineContent"></div>
       </div>
     </section>
 
-    <!-- Routine Builder Panel -->
-    <section id="builderPanel" class="panel">
-      <div class="card">
-        <h2>Routine Builder</h2>
-        <p class="subtle">Create, rename, configure, or duplicate your physical therapy schedules[cite: 1].</p>
-        <div id="editPanel" style="margin-top: 14px;">Loading builder options...</div>
-      </div>
-    </section>
-
-    <!-- Library Panel -->
+    <!-- LIBRARY PANEL -->
     <section id="libraryPanel" class="panel">
       <div class="card">
-        <h2>Exercise Library</h2>
-        <p class="subtle">Browse stretches, strength movements, and corrective protocols[cite: 1].</p>
-        <div id="libraryContent" style="margin-top: 14px;">Loading library...</div>
+        <div class="row spaced" style="margin-bottom: 12px;">
+          <h2 class="section-title" style="margin:0;">Exercise Library</h2>
+          <button class="btn small" type="button" onclick="openLibraryManager()">Manage Library</button>
+        </div>
+        <div class="field" style="margin-bottom: 14px;">
+          <input type="text" id="librarySearch" placeholder="Search exercises by name, category, or tag..." oninput="onLibrarySearch(event)">
+        </div>
+        <div id="libraryContent"></div>
       </div>
     </section>
 
-    <!-- Log Panel -->
+    <!-- ROUTINE BUILDER PANEL -->
+    <section id="editPanel" class="panel">
+      <div class="card">
+        <div class="row spaced" style="margin-bottom: 12px;">
+          <h2 class="section-title" style="margin:0;">Routine Builder</h2>
+          <button class="btn small" type="button" data-create-routine>+ New Routine Template</button>
+        </div>
+        <div class="field" style="margin-bottom: 14px;">
+          <label for="routineSelectDropdown">Select Routine Template to Edit</label>
+          <select id="routineSelectDropdown" data-select-routine></select>
+        </div>
+        <div id="routineBuilderContent"></div>
+      </div>
+    </section>
+
+    <!-- LOG & CALENDAR PANEL -->
     <section id="logPanel" class="panel">
-      <div id="logContent">Loading activity logs...</div>
+      <!-- Rendered dynamically by renderLog() -->
     </section>
   </main>
 
-  <!-- Modals & Toasts -->
-  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
-    <div class="modal card">
-      <div class="row spaced" style="margin-bottom: 12px;">
-        <h3 id="modalTitle" class="section-title">Edit Exercise</h3>
-        <button class="btn secondary small" onclick="closeModal()">Close</button>
+  <!-- MODAL FOR EDITING/ADDING EXERCISES -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="row spaced" style="margin-bottom: 14px;">
+        <h3 id="modalTitle" style="margin:0;">Edit Exercise</h3>
+        <button class="btn secondary small" type="button" onclick="closeModal()">Close</button>
       </div>
       <form id="exerciseModalForm" onsubmit="onModalSubmit(event)">
         <input type="hidden" name="id">
-        <div style="margin-bottom:10px;"><label>Name</label><input name="name" id="modalName" required></div>
-        <div style="margin-bottom:10px;"><label>Category</label><select name="category"><option>Strength</option><option>Stretching</option><option>Decompression</option><option>Avoid</option></select></div>
-        <div style="margin-bottom:10px;"><label>Description</label><textarea name="description" rows="2" required></textarea></div>
-        <div style="margin-bottom:10px;"><label>What to Feel</label><textarea name="whatToFeel" rows="2"></textarea></div>
-        <div style="margin-bottom:10px;"><label>Technique (one per line)</label><textarea name="technique" rows="3"></textarea></div>
-        <div style="margin-bottom:10px;"><label>Common Mistakes (one per line)</label><textarea name="commonMistakes" rows="3"></textarea></div>
-        <div style="margin-bottom:10px;"><label>Progression</label><textarea name="progression" rows="2"></textarea></div>
-        <div style="margin-bottom:10px;"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
-        <div style="margin-bottom:14px;"><label>Tags (comma separated)</label><input name="tags"></div>
-        <div class="row" style="justify-content:flex-end;">
-          <button type="button" class="btn secondary" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="btn">Save Exercise</button>
+        <div class="field"><label>Exercise Name</label><input name="name" id="modalName" required></div>
+        <div class="field"><label>Category</label>
+          <select name="category">
+            <option value="Stretching">Stretching</option>
+            <option value="Strength">Strength</option>
+            <option value="Decompression">Decompression</option>
+            <option value="Avoid">Avoid</option>
+          </select>
+        </div>
+        <div class="field"><label>Description</label><textarea name="description" rows="2" required></textarea></div>
+        <div class="field"><label>What to Feel</label><textarea name="whatToFeel" rows="2"></textarea></div>
+        <div class="field"><label>Technique (one item per line)</label><textarea name="technique" rows="2"></textarea></div>
+        <div class="field"><label>Common Mistakes (one item per line)</label><textarea name="commonMistakes" rows="2"></textarea></div>
+        <div class="field"><label>Progression</label><textarea name="progression" rows="2"></textarea></div>
+        <div class="field"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+        <div class="field"><label>Tags (comma separated)</label><input name="tags"></div>
+        <div class="row" style="justify-content: flex-end; margin-top: 14px;">
+          <button class="btn secondary small" type="button" onclick="closeModal()">Cancel</button>
+          <button class="btn small" type="submit">Save Exercise</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <!-- LIBRARY MANAGER MODAL -->
+  <div class="modal-backdrop" id="libraryManagerBackdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="row spaced" style="margin-bottom: 14px;">
+        <h3 style="margin:0;">Library Manager</h3>
+        <button class="btn secondary small" type="button" onclick="closeLibraryManager()">Close</button>
+      </div>
+      <div id="libraryManagerList" style="max-height: 60vh; overflow-y: auto; padding-right: 4px;"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMessage"></div>
 
   <script>
-    const STORAGE_KEY = 'pt_exercise_tracker_state_v1.7';
-
-    const defaultExercises = [
-      { id: 'dead-bugs', name: 'Dead Bugs', category: 'Strength', description: 'Supine core stabilization exercise maintaining neutral spine.', tags: ['core', 'stability'], drillDown: { whatToFeel: 'Deep abdominal tension without lower back arching.', technique: ['Lie flat on back with arms extended upward and knees bent at 90 degrees.', 'Lower opposite arm and leg slowly toward floor.', 'Return to start and switch sides.'], commonMistakes: ['Allowing lower back to lift off floor.'], progression: 'Extend limbs closer to ground or hold light weights.', notes: 'Breathe steadily throughout.' } },
-      { id: 'cat-cow', name: 'Cat-Cow Stretch', category: 'Stretching', description: 'Gentle spinal mobility flow on hands and knees.', tags: ['mobility', 'spine'], drillDown: { whatToFeel: 'Smooth articulation along entire vertebral column.', technique: ['Start on hands and knees.', 'Inhale to drop belly and lift chest (Cow).', 'Exhale to round back toward ceiling (Cat).'], commonMistakes: ['Rushing through the transitions.'], progression: 'Increase hold times at end ranges.', notes: 'Keep movements pain-free.' } }
+    const DEFAULT_EXERCISES = [
+      { id: 'cat-cow', name: 'Cat-Cow Stretch', category: 'Stretching', description: 'Gentle mobility exercise for the spine.', drillDown: { whatToFeel: 'Gentle stretch along the back and neck.', technique: ['Start on hands and knees.', 'Inhale as you drop your belly and lift your chest.', 'Exhale as you draw your belly button toward your spine and arch your back.'], commonMistakes: ['Moving too quickly through transitions.'], progression: 'Hold end ranges slightly longer.', notes: 'Great warm-up exercise.', tags: ['spine', 'mobility'] },
+      { id: 'dead-bugs', name: 'Dead Bugs', category: 'Strength', description: 'Supine core stabilization exercise.', drillDown: { whatToFeel: 'Deep abdominal engagement without low back arching.', technique: ['Lie on back, arms extended toward ceiling, knees bent at 90 degrees.', 'Lower opposite arm and leg toward floor.', 'Return to center and switch sides.'], commonMistakes: ['Allowing lower back to arch off the floor.'], progression: 'Extend legs straight out completely.', notes: 'Keep core braced tightly.', tags: ['core', 'stability'] },
+      { id: 'bird-dog', name: 'Bird-Dog', category: 'Strength', description: 'Quadruped core and back stabilization.', drillDown: { whatToFeel: 'Glute and lower back activation.', technique: ['Start on hands and knees.', 'Extend opposite arm and leg simultaneously.', 'Hold briefly and return.'], commonMistakes: ['Rotating hips or slouching shoulders.'], progression: 'Hold extension for 5-10 seconds.', notes: 'Focus on stability.', tags: ['core', 'back'] },
+      { id: 'lumbar-decompression', name: 'Supine Knee-to-Chest Decompression', category: 'Decompression', description: 'Unloading technique for lumbar spine.', drillDown: { whatToFeel: 'Relief and gentle stretch in lower back.', technique: ['Lie on your back.', 'Gently pull knees toward chest.', 'Breathe deeply and relax.'], commonMistakes: ['Pulling too forcefully.'], progression: 'Perform single knee pulls.', notes: 'Can be done multiple times a day.', tags: ['relief', 'spine'] } }
     ];
 
-    let state = loadState() || {
-      exercises: defaultExercises,
-      routineTemplates: {
-        'default': {
-          id: 'default',
-          name: 'Core & Mobility Routine',
-          exercises: [
-            { exerciseId: 'dead-bugs', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] },
-            { exerciseId: 'cat-cow', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] }
-          ]
-        }
-      },
-      activeRoutineId: 'default',
-      routines: {},
-      ui: { activeTab: 'today', search: '', monthOffset: 0, selectedLogDate: todayISO() }
+    let state = loadState();
+    let ui = {
+      activeTab: 'today',
+      selectedLogDate: todayISO(),
+      monthOffset: 0,
+      search: '',
+      editingId: null
     };
 
-    let ui = state.ui;
-
     function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch(e) {
-        return null;
+      const saved = localStorage.getItem('pt_tracker_state_v2');
+      if(saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if(!parsed.exercises || !parsed.exercises.length) parsed.exercises = DEFAULT_EXERCISES;
+          return parsed;
+        } catch(e) {}
       }
+      return {
+        exercises: DEFAULT_EXERCISES,
+        routineTemplates: {
+          'default-routine': {
+            name: 'Daily Recovery Routine',
+            exercises: [
+              { exerciseId: 'cat-cow', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] },
+              { exerciseId: 'dead-bugs', sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] }
+            ]
+          }
+        },
+        activeRoutineId: 'default-routine',
+        routines: {}
+      };
     }
 
-    function persist(notify = true) {
-      try {
-        state.ui = ui;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        if(notify) toast('Changes saved');
-      } catch(e) {
-        toast('Error saving state to storage', true);
-      }
+    function persist(render = true) {
+      localStorage.setItem('pt_tracker_state_v2', JSON.stringify(state));
+      if(render) renderActive();
     }
 
     function todayISO() {
@@ -486,379 +341,292 @@ details.guide summary {
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    function toast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.style.borderColor = isError ? 'var(--danger-bg)' : 'rgba(255,255,255,.15)';
-      t.style.display = 'block';
-      setTimeout(() => { t.style.display = 'none'; }, 2800);
+    function endOfMonth(d) {
+      return new Date(d.getFullYear(), d.getMonth() + 1, 0);
     }
 
     function slugify(str) {
-      return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
     function normalizeCategory(c) {
-      return c ? c.charAt(0).toUpperCase() + c.slice(1).toLowerCase() : 'Strength';
+      const match = ['Stretching', 'Strength', 'Decompression', 'Avoid'].find(item => item.toLowerCase() === (c||'').toLowerCase());
+      return match || 'Strength';
     }
 
-    function getActiveTemplate() {
-      return state.routineTemplates[state.activeRoutineId] || Object.values(state.routineTemplates)[0];
+    function splitLines(str) {
+      if(!str) return [];
+      return String(str).split('\n').map(s => s.trim()).filter(Boolean);
     }
 
-    function getRoutine(dateISO, routineId = state.activeRoutineId) {
-      const key = `${dateISO}__${routineId}`;
-      if(!state.routines[key]) {
-        const template = state.routineTemplates[routineId] || getActiveTemplate();
-        state.routines[key] = {
-          date: dateISO,
-          routineId: template.id,
-          routineName: template.name,
-          exercises: template.exercises.map(ex => ({
-            exerciseId: ex.exerciseId,
-            sets: ex.sets,
-            reps: ex.reps,
-            holdDuration: ex.holdDuration,
-            holdRep: ex.holdRep,
-            completed: Array.from({length: ex.sets}, () => false)
-          })),
-          completionStatus: 'none'
-        };
-      }
-      return state.routines[key];
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    function ensureRoutineSession(dateISO, routineId) {
-      getRoutine(dateISO, routineId);
-    }
-
-    function computeCompletionStatus(routine) {
-      const list = routine.exercises || [];
-      let totalSets = 0, completedSets = 0;
-      list.forEach(item => {
-        totalSets += (item.sets || 0);
-        completedSets += (item.completed || []).filter(Boolean).length;
-      });
-      if(totalSets === 0 || completedSets === 0) return 'none';
-      if(completedSets >= totalSets) return 'full';
-      return 'partial';
-    }
-
-    function replaceActiveTemplateFromRoutine(routine) {
-      const template = state.routineTemplates[state.activeRoutineId];
-      if(!template) return;
-      template.exercises = routine.exercises.map(item => ({
-        exerciseId: item.exerciseId,
-        sets: item.sets,
-        reps: item.reps,
-        holdDuration: item.holdDuration,
-        holdRep: item.holdRep,
-        completed: Array.from({length: item.sets}, () => false)
-      }));
-      template.updatedAt = new Date().toISOString();
+    function toast(msg, isError = false) {
+      const t = document.getElementById('toastMessage');
+      t.textContent = msg;
+      t.style.borderColor = isError ? '#ff9bad' : 'rgba(255,255,255,.12)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
     }
 
     function switchTab(tabName) {
       ui.activeTab = tabName;
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      
-      const panelId = tabName === 'builder' ? 'builderPanel' : tabName + 'Panel';
-      document.getElementById(panelId).classList.add('active');
-      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+      document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+      const activePanel = document.getElementById(tabName === 'builder' ? 'editPanel' : `${tabName}Panel`);
+      if(activePanel) activePanel.classList.add('active');
       renderActive();
     }
 
     function renderActive() {
       if(ui.activeTab === 'today') renderToday();
-      else if(ui.activeTab === 'builder') renderEdit();
       else if(ui.activeTab === 'library') renderLibrary();
+      else if(ui.activeTab === 'builder') renderEdit();
       else if(ui.activeTab === 'log') renderLog();
       updateTabBadge();
     }
 
-    function renderToday() {
-      const container = document.getElementById('todayContent');
-      const routineIds = Object.keys(state.routineTemplates);
-      const activeRoutine = getRoutine(todayISO(), state.activeRoutineId);
-      
-      let html = `
-        <div class="row spaced" style="margin-bottom: 12px; flex-wrap: wrap;">
-          <div><strong>Date:</strong> ${todayISO()}</div>
-          <div class="row" style="gap: 6px;">
-            <label for="activeRoutineSelect" style="margin:0; align-self:center;">Routine:</label>
-            <select id="activeRoutineSelect" data-active-routine style="width: auto; min-width: 180px;">
-              ${routineIds.map(id => `<option value="${id}" ${id === state.activeRoutineId ? 'selected' : ''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-      `;
-
-      if(!activeRoutine.exercises || activeRoutine.exercises.length === 0) {
-        html += `<div class="subtle">No exercises in this routine yet. Visit the Routine Builder tab to add some[cite: 1].</div>`;
-      } else {
-        activeRoutine.exercises.forEach((item, idx) => {
-          const ex = state.exercises.find(x => x.id === item.exerciseId) || { name: 'Unknown Exercise', category: 'General', description: '' };
-          html += `
-            <div class="card exercise-card" style="margin-bottom: 12px;">
-              <div class="row spaced">
-                <div>
-                  <h4 style="margin:0; font-size: 1.05rem;">${escapeHtml(ex.name)}</h4>
-                  <span class="chip" style="margin-top: 4px;">${escapeHtml(ex.category)}</span>
-                </div>
-                <div class="subtle">${item.sets} sets × ${item.reps} reps${item.holdDuration ? ` (${item.holdDuration}s hold)` : ''}</div>
-              </div>
-              <p class="exercise-desc" style="margin: 8px 0;">${escapeHtml(ex.description)}</p>
-              <div class="row" style="flex-wrap: wrap; gap: 4px; margin-top: 8px;">
-                ${Array.from({length: item.sets}, (_, sIdx) => `
-                  <label class="set-box">
-                    <input type="checkbox" data-today-date="${todayISO()}" data-routine-id="${state.activeRoutineId}" data-exercise-id="${item.exerciseId}" data-set-index="${sIdx}" ${item.completed[sIdx] ? 'checked' : ''}>
-                    Set ${sIdx + 1}
-                  </label>
-                `).join('')}
-              </div>
-              ${ex.drillDown ? `
-                <details class="guide" style="margin-top: 10px;">
-                  <summary>Exercise Guide</summary>
-                  <div class="guide-body">
-                    ${ex.drillDown.whatToFeel ? `<div><strong>What to Feel:</strong> ${escapeHtml(ex.drillDown.whatToFeel)}</div>` : ''}
-                    ${ex.drillDown.technique?.length ? `<div style="margin-top:4px;"><strong>Technique:</strong><ul>${ex.drillDown.technique.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>` : ''}
-                  </div>
-                </details>
-              ` : ''}
-            </div>
-          `;
-        });
+    function getRoutine(dateIso, templateId = state.activeRoutineId) {
+      const key = `${dateIso}_${templateId}`;
+      if(!state.routines[key]) {
+        const template = state.routineTemplates[templateId] || Object.values(state.routineTemplates)[0];
+        state.routines[key] = {
+          date: dateIso,
+          templateId: templateId,
+          routineName: template ? template.name : 'Routine',
+          exercises: JSON.parse(JSON.stringify(template ? template.exercises : [])),
+          completionStatus: 'none',
+          notes: ''
+        };
       }
-      container.innerHTML = html;
+      return state.routines[key];
     }
 
-    function renderEdit() {
-      const container = document.getElementById('editPanel');
-      const routineIds = Object.keys(state.routineTemplates);
-      const activeTemplate = getActiveTemplate();
-      const routine = getRoutine(todayISO(), state.activeRoutineId);
-
-      let html = `
-        <div class="row spaced" style="margin-bottom: 14px; flex-wrap: wrap;">
-          <div class="row" style="gap: 8px; flex: 1; min-width: 240px;">
-            <select id="routineSelect" data-select-routine style="flex: 1;">
-              ${routineIds.map(id => `<option value="${id}" ${id === state.activeRoutineId ? 'selected' : ''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
-            </select>
-            <button class="btn secondary small" type="button" data-delete-routine>Delete Routine</button>
-          </div>
-        </div>
-        
-        <div class="card routine-item" style="margin-bottom: 14px;">
-          <h3 class="section-title">Routine Name</h3>
-          <div class="row" style="gap: 8px;">
-            <input id="routineNameInput" value="${escapeHtml(activeTemplate.name)}" style="flex:1;">
-            <button class="btn small" type="button" data-rename-routine>Save Name</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="section-title">Exercises in Routine</h3>
-          <div id="routineExerciseList">
-            ${routine.exercises.length === 0 ? '<div class="subtle">No exercises added to this routine yet.</div>' : ''}
-            ${routine.exercises.map((item, idx) => {
-              const ex = state.exercises.find(x => x.id === item.exerciseId) || { name: 'Unknown Exercise' };
-              return `
-                <div class="mini-box" style="margin-bottom: 10px;">
-                  <div class="row spaced">
-                    <strong>${escapeHtml(ex.name)}</strong>
-                    <button class="btn danger small" type="button" data-remove-routine="${idx}">Remove</button>
-                  </div>
-                  <div class="row" style="margin-top: 8px; gap: 8px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 100px;">
-                      <label style="font-size:0.8rem;">Sets</label>
-                      <input type="number" min="1" value="${item.sets}" data-routine-field="sets" data-index="${idx}">
-                    </div>
-                    <div style="flex: 1; min-width: 100px;">
-                      <label style="font-size:0.8rem;">Reps</label>
-                      <input type="number" min="0" value="${item.reps}" data-routine-field="reps" data-index="${idx}">
-                    </div>
-                    <div style="flex: 1; min-width: 100px;">
-                      <label style="font-size:0.8rem;">Hold (sec)</label>
-                      <input type="number" min="0" value="${item.holdDuration || 0}" data-routine-field="holdDuration" data-index="${idx}">
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <div class="row" style="margin-top: 14px; gap: 8px;">
-            <select id="addExerciseSelect" style="flex: 1;">
-              ${state.exercises.map(ex => `<option value="${ex.id}">${escapeHtml(ex.name)} (${escapeHtml(ex.category)})</option>`).join('')}
-            </select>
-            <button class="btn small" type="button" data-add-to-routine>Add Exercise</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="section-title">Create New Routine</h3>
-          <div class="row" style="gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-            <input id="newRoutineName" placeholder="New routine name..." style="flex: 1; min-width: 200px;">
-            <select id="newRoutineSource" style="width: auto;">
-              <option value="blank">Start Blank</option>
-              <option value="existing">Duplicate Existing</option>
-            </select>
-          </div>
-          <div id="newRoutineSourceWrap" style="display:none; margin-bottom: 8px;">
-            <select id="newRoutineSourceId">
-              ${routineIds.map(id => `<option value="${id}">${escapeHtml(state.routineTemplates[id].name)}</option>`).join('')}
-            </select>
-          </div>
-          <button class="btn small" type="button" data-create-routine>Create Routine</button>
-        </div>
-      `;
-      container.innerHTML = html;
+    function ensureRoutineSession(dateIso, templateId) {
+      getRoutine(dateIso, templateId);
     }
 
+    function computeCompletionStatus(routine) {
+      const list = routine.exercises || [];
+      let totalSets = 0;
+      let completedSets = 0;
+      list.forEach(ex => {
+        const sets = ex.sets || 0;
+        totalSets += sets;
+        const comp = ex.completed || [];
+        for(let i=0; i<sets; i++) {
+          if(comp[i]) completedSets++;
+        }
+      });
+      if(totalSets === 0) return 'none';
+      if(completedSets === 0) return 'none';
+      if(completedSets >= totalSets) return 'full';
+      return 'partial';
+    }
+
+    function getDaySessions(dateIso) {
+      return Object.values(state.routines).filter(r => r.date === dateIso);
+    }
+
+    function getDayStatus(dateIso) {
+      const sessions = getDaySessions(dateIso);
+      if(!sessions.length) return null;
+      let hasFull = false;
+      let hasPartial = false;
+      let hasNone = false;
+      sessions.forEach(s => {
+        const st = s.completionStatus || computeCompletionStatus(s);
+        if(st === 'full') hasFull = true;
+        else if(st === 'partial') hasPartial = true;
+        else hasNone = true;
+      });
+      if(hasFull && !hasPartial && !hasNone && sessions.length > 0) return 'full';
+      if(hasFull || hasPartial) return 'partial';
+      return 'none';
+    }
+
+    /* --- RENDER TODAY --- */
+    function renderToday() {
+      const todayIso = todayISO();
+      document.getElementById('todayDateStr').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+      
+      const select = document.getElementById('activeRoutineSelect');
+      select.innerHTML = Object.keys(state.routineTemplates).map(id => `<option value="${id}" ${state.activeRoutineId===id?'selected':''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('');
+
+      const routine = getRoutine(todayIso, state.activeRoutineId);
+      routine.completionStatus = computeCompletionStatus(routine);
+      
+      const content = document.getElementById('todayRoutineContent');
+      if(!routine.exercises.length) {
+        content.innerHTML = `<div class="subtle">No exercises in this routine. <a href="#" data-jump-tab="builder">Go to Routine Builder</a> to add some.</div>`;
+        return;
+      }
+
+      content.innerHTML = routine.exercises.map((item, index) => {
+        const ex = state.exercises.find(e => e.id === item.exerciseId) || { name: 'Unknown Exercise', category: 'General', description: '' };
+        let setBoxes = '';
+        for(let s=0; s<item.sets; s++) {
+          const checked = item.completed && item.completed[s] ? 'checked' : '';
+          setBoxes += `<label class="set-box"><input type="checkbox" data-today-date="${todayIso}" data-routine-id="${state.activeRoutineId}" data-exercise-id="${item.exerciseId}" data-set-index="${s}" ${checked}> Set ${s+1}</label>`;
+        }
+        return `<div class="exercise-card">
+          <div class="row spaced">
+            <h4>${escapeHtml(ex.name)} <span class="chip">${escapeHtml(ex.category)}</span></h4>
+            <span class="subtle">${item.reps} reps${item.holdDuration ? ` (${item.holdDuration}s hold)` : ''}</span>
+          </div>
+          <p class="subtle" style="margin:6px 0;">${escapeHtml(ex.description)}</p>
+          <div class="set-row">${setBoxes}</div>
+        </div>`;
+      }).join('');
+    }
+
+    /* --- RENDER LIBRARY --- */
     function renderLibrary() {
       const container = document.getElementById('libraryContent');
-      const search = (ui.search || '').toLowerCase();
+      const q = ui.search.toLowerCase();
       const filtered = state.exercises.filter(ex => 
-        ex.name.toLowerCase().includes(search) || 
-        ex.category.toLowerCase().includes(search) ||
-        (ex.tags || []).some(t => t.toLowerCase().includes(search))
+        ex.name.toLowerCase().includes(q) || 
+        ex.category.toLowerCase().includes(q) || 
+        (ex.tags || []).some(t => t.toLowerCase().includes(q))
       );
 
-      let html = `
-        <div class="row spaced" style="margin-bottom: 14px; flex-wrap: wrap;">
-          <input id="librarySearch" placeholder="Search exercises, categories, or tags..." value="${escapeHtml(ui.search)}" style="flex: 1; min-width: 200px;" oninput="onLibrarySearch(event)">
-          <button class="btn small" type="button" onclick="openModal()">Add New Exercise</button>
-        </div>
-        <div id="exerciseList">
-          ${filtered.length === 0 ? '<div class="subtle">No matching exercises found.</div>' : ''}
-          ${filtered.map(ex => `
-            <div class="card exercise-card" style="margin-bottom: 12px;">
-              <div class="row spaced">
-                <h4 style="margin:0;">${escapeHtml(ex.name)}</h4>
-                <div class="row" style="gap: 6px;">
-                  <span class="chip">${escapeHtml(ex.category)}</span>
-                  <button class="btn secondary small" type="button" onclick="openModal('${ex.id}')">Edit</button>
-                </div>
-              </div>
-              <p class="exercise-desc" style="margin: 8px 0;">${escapeHtml(ex.description)}</p>
-              ${ex.drillDown ? `
-                <details class="guide">
-                  <summary>View Guidance & Technique</summary>
-                  <div class="guide-body">
-                    ${ex.drillDown.whatToFeel ? `<div><strong>What to Feel:</strong> ${escapeHtml(ex.drillDown.whatToFeel)}</div>` : ''}
-                    ${ex.drillDown.technique?.length ? `<div style="margin-top:4px;"><strong>Technique:</strong><ul>${ex.drillDown.technique.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>` : ''}
-                    ${ex.drillDown.commonMistakes?.length ? `<div style="margin-top:4px;"><strong>Common Mistakes:</strong><ul>${ex.drillDown.commonMistakes.map(m=>`<li>${escapeHtml(m)}</li>`).join('')}</ul></div>` : ''}
-                  </div>
-                </details>
-              ` : ''}
-            </div>
-          `).join('')}
-        </div>
-      `;
-      container.innerHTML = html;
-    }
-
-    function renderLog() {
-      const container = document.getElementById('logContent');
-      const now = new Date();
-      now.setMonth(now.getMonth() + (ui.monthOffset || 0));
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-      const firstDayIndex = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      let stats = { full: 0, partial: 0, none: 0 };
-      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      let days = [];
-
-      for(let i = 0; i < firstDayIndex; i++) days.push(null);
-      for(let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
-
-      function getDayStatus(iso) {
-        const sessions = Object.values(state.routines).filter(r => r.date === iso);
-        if(!sessions.length) return null;
-        if(sessions.every(s => s.completionStatus === 'full')) return 'full';
-        if(sessions.some(s => s.completionStatus === 'full' || s.completionStatus === 'partial')) return 'partial';
-        return 'none';
+      if(!filtered.length) {
+        container.innerHTML = `<div class="subtle">No exercises found matching your search.</div>`;
+        return;
       }
 
-      days.forEach(d => {
-        if(!d) return;
-        const status = getDayStatus(isoFromDate(d));
-        if(status === 'full') stats.full++;
-        else if(status === 'partial') stats.partial++;
-        else if(status === 'none') stats.none++;
-      });
+      container.innerHTML = filtered.map(ex => {
+        const dd = ex.drillDown || {};
+        return `<div class="exercise-card">
+          <div class="row spaced">
+            <h4>${escapeHtml(ex.name)} <span class="chip ${ex.category==='Avoid'?'warn':''}">${escapeHtml(ex.category)}</span></h4>
+            <button class="btn secondary small" type="button" onclick="openModal('${ex.id}')">Edit</button>
+          </div>
+          <p style="margin:6px 0;">${escapeHtml(ex.description)}</p>
+          ${dd.whatToFeel ? `<div class="subtle" style="margin-top:4px"><strong>What to feel:</strong> ${escapeHtml(dd.whatToFeel)}</div>` : ''}
+          ${dd.technique && dd.technique.length ? `<div class="subtle" style="margin-top:4px"><strong>Technique:</strong><ul style="margin:2px 0; padding-left:16px;">${dd.technique.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>` : ''}
+        </div>`;
+      }).join('');
+    }
 
-      const streak = calcStreak();
-      const selectedISO = ui.selectedLogDate || todayISO();
-      const selectedSessions = Object.values(state.routines).filter(r => r.date === selectedISO);
+    /* --- RENDER ROUTINE BUILDER --- */
+    function renderEdit() {
+      const select = document.getElementById('routineSelectDropdown');
+      select.innerHTML = Object.keys(state.routineTemplates).map(id => `<option value="${id}" ${state.activeRoutineId===id?'selected':''}>${escapeHtml(state.routineTemplates[id].name)}</option>`).join('');
+
+      const template = state.routineTemplates[state.activeRoutineId];
+      const container = document.getElementById('routineBuilderContent');
+
+      let exercisesHtml = template.exercises.map((item, index) => {
+        const ex = state.exercises.find(e => e.id === item.exerciseId) || { name: 'Unknown' };
+        return `<div class="routine-builder-item">
+          <div class="row spaced" style="margin-bottom:8px;">
+            <strong>${escapeHtml(ex.name)}</strong>
+            <button class="btn danger small" type="button" data-remove-routine-item="${index}">Remove</button>
+          </div>
+          <div class="set-row">
+            <div style="flex:1;"><label>Sets</label><input type="number" min="1" value="${item.sets}" data-routine-field="sets" data-index="${index}"></div>
+            <div style="flex:1;"><label>Reps</label><input type="number" min="0" value="${item.reps}" data-routine-field="reps" data-index="${index}"></div>
+            <div style="flex:1;"><label>Hold (sec)</label><input type="number" min="0" value="${item.holdDuration || 0}" data-routine-field="holdDuration" data-index="${index}"></div>
+          </div>
+        </div>`;
+      }).join('');
 
       container.innerHTML = `
-        <div class="card">
-          <div class="calendar-toolbar">
-            <div>
-              <h2 class="section-title">Log — ${monthName}</h2>
-              <div class="subtle">Review completed routines and monthly frequency.</div>
-            </div>
-            <div class="row" style="gap: 6px; flex-wrap: wrap;">
-              <button class="btn secondary small" type="button" data-month-nav="-1">Previous</button>
-              <button class="btn secondary small" type="button" data-month-nav="0">Current</button>
-              <button class="btn secondary small" type="button" data-month-nav="1">Next</button>
-              <button class="btn small" type="button" data-export-csv>Export CSV</button>
-            </div>
-          </div>
-
-          <div class="stats" style="margin-top: 14px;">
-            <div class="stat"><div class="muted">Full</div><div class="num">${stats.full}</div></div>
-            <div class="stat"><div class="muted">Partial</div><div class="num">${stats.partial}</div></div>
-            <div class="stat"><div class="muted">None</div><div class="num">${stats.none}</div></div>
-            <div class="stat"><div class="muted">Streak</div><div class="num">${streak}</div></div>
-          </div>
-
-          <div class="calendar-grid" style="margin-top: 14px;">
-            ${weekdays.map(w => `<div class="day-head">${w}</div>`).join('')}
-            ${days.map(d => {
-              if(!d) return `<div class="day-cell empty"></div>`;
-              const iso = isoFromDate(d);
-              const status = getDayStatus(iso);
-              const cls = status || 'empty';
-              const selectedStyle = ui.selectedLogDate === iso ? 'outline: 2px solid var(--focus);' : '';
-              return `
-                <div class="day-cell ${cls}" data-day="${iso}" style="${selectedStyle}">
-                  <div class="date">${d.getDate()}</div>
-                  ${status ? `<div class="muted" style="font-size:0.75rem; text-transform:capitalize; margin-top:2px;">${status}</div>` : ''}
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <div class="card" style="margin-top: 16px;">
-            <h3 class="section-title">Selected Day: ${escapeHtml(selectedISO)}</h3>
-            ${selectedSessions.length === 0 ? '<div class="subtle">No routine logged for this date.</div>' : selectedSessions.map(s => `
-              <div class="mini-box">
-                <strong>${escapeHtml(s.routineName)}</strong> — <span class="chip">${s.completionStatus}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <!-- JSON Backup & Restore Card -->
-          <div class="card" style="margin-top: 16px; background: rgba(255,255,255,.02);">
-            <h3 class="section-title">App Data Backup & Restore</h3>
-            <p class="subtle" style="margin-bottom: 12px;">Export all your routines, custom exercises, and historical logs into a single backup file, or restore from a previous backup when switching devices or reinstalling iOS.</p>
-            <div class="row" style="gap: 10px; flex-wrap: wrap;">
-              <button class="btn small" type="button" onclick="exportJsonBackup()">Download JSON Backup</button>
-              <label class="btn secondary small" style="margin: 0; cursor: pointer; display: inline-flex; align-items: center;">
-                Restore JSON Backup
-                <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importJsonBackup(event)">
-              </label>
-            </div>
-          </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>Routine Name</label>
+          <input type="text" id="routineNameInput" value="${escapeHtml(template.name)}">
+        </div>
+        <h3 style="margin-top:16px;">Exercises in Routine</h3>
+        ${exercisesHtml || '<div class="subtle" style="margin-bottom:12px;">No exercises added to this routine yet.</div>'}
+        <div class="row" style="margin-top:14px; gap:8px;">
+          <select id="addExerciseSelect" style="margin:0; flex:1;">
+            ${state.exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)} (${escapeHtml(e.category)})</option>`).join('')}
+          </select>
+          <button class="btn small" type="button" onclick="onAddToRoutine()">Add Exercise</button>
         </div>
       `;
+    }
+
+    /* --- RENDER LOG & CALENDAR --- */
+    function renderLog() {
+      const panel = document.getElementById('logPanel');
+      const current = new Date();
+      current.setMonth(current.getMonth() + ui.monthOffset);
+      const y = current.getFullYear();
+      const m = current.getMonth();
+      const first = new Date(y, m, 1);
+      const last = endOfMonth(current);
+      const monthName = current.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+      const weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const startPad = first.getDay();
+      
+      const days = [];
+      for(let i=0; i<startPad; i++) days.push(null);
+      for(let d=1; d<=last.getDate(); d++) days.push(new Date(y, m, d));
+      while(days.length % 7 !== 0) days.push(undefined);
+
+      const monthDates = days.filter(Boolean).map(isoFromDate);
+      const dayStatuses = monthDates.map(date => getDayStatus(date)).filter(Boolean);
+      const stats = dayStatuses.reduce((acc, status) => {
+        if(status==='full') acc.full++;
+        else if(status==='partial') acc.partial++;
+        else acc.none++;
+        return acc;
+      }, {full:0, partial:0, none:0});
+
+      const streak = calcStreak();
+      const selectedSessions = getDaySessions(ui.selectedLogDate);
+
+      panel.innerHTML = `<div class="card">
+        <div class="calendar-toolbar">
+          <div>
+            <h2 class="section-title">Log — ${monthName}</h2>
+            <div class="subtle">Track completion across your routines, review past days, and export as CSV.</div>
+          </div>
+          <div class="inline-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn secondary small" type="button" data-month-nav="-1">Previous</button>
+            <button class="btn secondary small" type="button" data-month-nav="0">Current</button>
+            <button class="btn secondary small" type="button" data-month-nav="1">Next</button>
+            <button class="btn small" type="button" data-export-csv>Export CSV</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="muted">Full completion</div><div class="num">${stats.full}</div></div>
+          <div class="stat"><div class="muted">Partial completion</div><div class="num">${stats.partial}</div></div>
+          <div class="stat"><div class="muted">No completion</div><div class="num">${stats.none}</div></div>
+          <div class="stat"><div class="muted">Current streak</div><div class="num">${streak}</div></div>
+        </div>
+
+        <div class="calendar-grid" aria-label="Monthly calendar">
+          ${weekdays.map(w => `<div class="day-head">${w}</div>`).join('')}
+          ${days.map(d => {
+            if(d===null || d===undefined) return `<div class="day-cell empty"></div>`;
+            const iso = isoFromDate(d);
+            const status = getDayStatus(iso);
+            const cls = status || 'empty';
+            let body = status ? `<div class="subtle" style="font-size:0.75rem">${status==='full'?'Full':status==='partial'?'Partial':'None'}</div>` : `<div class="subtle" style="font-size:0.75rem">No log</div>`;
+            const sessions = getDaySessions(iso);
+            if(sessions.length > 1) body += `<div class="subtle" style="font-size:0.7rem">${sessions.length} routines</div>`;
+            const selectedStyle = ui.selectedLogDate === iso ? 'outline: 2px solid var(--focus);' : '';
+            return `<div class="day-cell ${cls}" data-day="${iso}" style="${selectedStyle}">
+              <div class="date">${d.getDate()}</div>${body}
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="selected-log">
+          <div class="row spaced"><h3 class="section-title" style="margin:0;">Selected Day: ${escapeHtml(ui.selectedLogDate)}</h3><span class="chip">${selectedSessions.length ? `${selectedSessions.length} routine${selectedSessions.length===1?'':'s'}` : 'No log'}</span></div>
+          ${selectedSessions.length ? selectedSessions.map(s => {
+            return `<div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08);">
+              <strong>${escapeHtml(s.routineName)}</strong> <span class="chip">${s.completionStatus}</span>
+            </div>`;
+          }).join('') : `<div class="subtle" style="margin-top:8px;">No routine was logged for this date.</div>`}
+        </div>
+      </div>`;
     }
 
     function calcStreak() {
@@ -866,209 +634,156 @@ details.guide summary {
       let d = new Date();
       while(true) {
         const iso = isoFromDate(d);
-        const sessions = Object.values(state.routines).filter(r => r.date === iso);
-        const hasFull = sessions.some(s => s.completionStatus === 'full');
-        if(hasFull) count++;
+        const status = getDayStatus(iso);
+        if(status === 'full' || status === 'partial') count++;
         else if(count > 0) break;
         else {
-          d.setDate(d.getDate() - 1);
-          const prevIso = isoFromDate(d);
-          const prevSessions = Object.values(state.routines).filter(r => r.date === prevIso);
-          if(!prevSessions.some(s => s.completionStatus === 'full')) break;
-          else continue;
+          if(iso === todayISO()) {
+            d.setDate(d.getDate() - 1);
+            continue;
+          }
+          break;
         }
         d.setDate(d.getDate() - 1);
       }
       return count;
     }
 
-    // JSON Backup & Restore Functions
-    function exportJsonBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `pt-tracker-backup-${todayISO()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      toast('Backup downloaded successfully');
-    }
-
-    function importJsonBackup(event) {
-      const file = event.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if(!parsed.exercises || !parsed.routineTemplates) {
-            throw new Error('Invalid backup file structure.');
-          }
-          state = parsed;
-          ui = state.ui || ui;
-          persist(false);
-          renderActive();
-          toast('Data successfully restored!');
-        } catch(err) {
-          toast('Failed to restore: Invalid backup file', true);
-        }
-        event.target.value = ''; // Reset file input
-      };
-      reader.readAsText(file);
-    }
-
-    // Event Handlers
-    document.addEventListener('change', e => {
+    /* --- EVENT HANDLERS --- */
+    document.addEventListener('change', (e) => {
       const activeSelect = e.target.closest('[data-active-routine]');
       if(activeSelect) {
         state.activeRoutineId = activeSelect.value;
         ensureRoutineSession(todayISO(), state.activeRoutineId);
-        persist(false);
-        renderToday();
-        updateTabBadge();
+        persist(true);
         return;
       }
 
-      const cb = e.target.closest('input[type="checkbox"][data-today-date]');
-      if(cb) {
-        const routine = getRoutine(cb.dataset.todayDate, cb.dataset.routineId || state.activeRoutineId);
-        const item = routine.exercises.find(x => x.exerciseId === cb.dataset.exerciseId);
+      const routineSelect = e.target.closest('[data-select-routine]');
+      if(routineSelect) {
+        state.activeRoutineId = routineSelect.value;
+        ensureRoutineSession(todayISO(), state.activeRoutineId);
+        persist(true);
+        return;
+      }
+
+      const todayCb = e.target.closest('input[type="checkbox"][data-today-date]');
+      if(todayCb) {
+        const routine = getRoutine(todayCb.dataset.todayDate, todayCb.dataset.routineId);
+        const item = routine.exercises.find(x => x.exerciseId === todayCb.dataset.exerciseId);
         if(item) {
-          item.completed[Number(cb.dataset.setIndex)] = cb.checked;
+          item.completed[Number(todayCb.dataset.setIndex)] = todayCb.checked;
           routine.completionStatus = computeCompletionStatus(routine);
           persist(false);
-          renderToday();
           updateTabBadge();
         }
         return;
       }
 
-      const field = e.target.closest('[data-routine-field]');
-      if(field) {
-        const idx = Number(field.dataset.index);
-        const routine = getRoutine(todayISO(), state.activeRoutineId);
-        const item = routine.exercises[idx];
-        if(!item) return;
-        const key = field.dataset.routineField;
-        if(key === 'sets') {
-          const val = Math.max(1, Number(field.value || 1));
-          const old = item.completed || [];
-          item.sets = val;
-          item.completed = Array.from({length: val}, (_, i) => Boolean(old[i]));
-        } else if(key === 'reps') {
-          item.reps = Math.max(0, Number(field.value || 0));
-        } else if(key === 'holdDuration') {
-          item.holdDuration = Math.max(0, Number(field.value || 0));
+      const routineField = e.target.closest('[data-routine-field]');
+      if(routineField) {
+        const idx = Number(routineField.dataset.index);
+        const template = state.routineTemplates[state.activeRoutineId];
+        const item = template.exercises[idx];
+        if(item) {
+          const fieldName = routineField.dataset.routineField;
+          if(fieldName === 'sets') {
+            const newSets = Math.max(1, Number(routineField.value || 1));
+            const old = item.completed || [];
+            item.sets = newSets;
+            item.completed = Array.from({length: newSets}, (_, i) => Boolean(old[i]));
+          } else if(fieldName === 'reps') {
+            item.reps = Math.max(0, Number(routineField.value || 0));
+          } else if(fieldName === 'holdDuration') {
+            item.holdDuration = Math.max(0, Number(routineField.value || 0));
+          }
+          persist(true);
         }
-        replaceActiveTemplateFromRoutine(routine);
-        routine.completionStatus = computeCompletionStatus(routine);
-        persist(false);
-        renderEdit();
       }
     });
 
-    document.addEventListener('click', e => {
-      if(e.target.closest('[data-month-nav]')) {
-        const val = Number(e.target.closest('[data-month-nav]').dataset.monthNav);
-        ui.monthOffset = val === 0 ? 0 : (ui.monthOffset || 0) + val;
-        renderLog();
+    document.addEventListener('input', (e) => {
+      if(e.target.id === 'routineNameInput') {
+        const template = state.routineTemplates[state.activeRoutineId];
+        if(template) {
+          template.name = e.target.value;
+          persist(false);
+        }
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const jump = e.target.closest('[data-jump-tab]');
+      if(jump) {
+        switchTab(jump.dataset.jumpTab);
         return;
       }
+
+      const createRoutineBtn = e.target.closest('[data-create-routine]');
+      if(createRoutineBtn) {
+        const name = prompt('Enter new routine name:', 'Custom Routine');
+        if(name) {
+          const id = slugify(name) + '-' + Date.now().toString().slice(-4);
+          state.routineTemplates[id] = { name: name, exercises: [] };
+          state.activeRoutineId = id;
+          persist(true);
+          toast('Routine created');
+        }
+        return;
+      }
+
+      const removeItemBtn = e.target.closest('[data-remove-routine-item]');
+      if(removeItemBtn) {
+        const idx = Number(removeItemBtn.dataset.removeRoutineItem);
+        const template = state.routineTemplates[state.activeRoutineId];
+        template.exercises.splice(idx, 1);
+        persist(true);
+        toast('Exercise removed from routine');
+        return;
+      }
+
       const dayCell = e.target.closest('[data-day]');
       if(dayCell) {
         ui.selectedLogDate = dayCell.dataset.day;
         renderLog();
         return;
       }
+
+      const monthNav = e.target.closest('[data-month-nav]');
+      if(monthNav) {
+        const val = Number(monthNav.dataset.monthNav);
+        ui.monthOffset = val === 0 ? 0 : ui.monthOffset + val;
+        renderLog();
+        return;
+      }
+
       if(e.target.closest('[data-export-csv]')) {
         exportCsv();
         return;
       }
-      if(e.target.closest('[data-rename-routine]')) {
-        const input = document.getElementById('routineNameInput');
-        const name = String(input?.value || '').trim();
-        if(!name) return toast('Routine name is required', true);
-        const t = getActiveTemplate();
-        t.name = name;
-        t.updatedAt = new Date().toISOString();
-        getRoutine(todayISO()).routineName = name;
-        persist(true);
-        renderEdit();
-        return;
-      }
-      if(e.target.closest('[data-delete-routine]')) {
-        if(Object.keys(state.routineTemplates).length <= 1) return toast('Keep at least one routine', true);
-        const t = getActiveTemplate();
-        if(!confirm(`Delete routine "${t.name}"?`)) return;
-        delete state.routineTemplates[t.id];
-        state.activeRoutineId = Object.keys(state.routineTemplates)[0];
-        ensureRoutineSession(todayISO(), state.activeRoutineId);
-        persist(true);
-        renderEdit();
-        renderToday();
-        return;
-      }
-      if(e.target.closest('[data-create-routine]')) {
-        const name = String(document.getElementById('newRoutineName')?.value || '').trim();
-        if(!name) return toast('Routine name required', true);
-        const sourceMode = document.getElementById('newRoutineSource')?.value;
-        const sourceId = document.getElementById('newRoutineSourceId')?.value;
-        const base = slugify(name);
-        let id = base, n = 2;
-        while(state.routineTemplates[id]) id = `${base}-${n++}`;
-        const source = sourceMode === 'existing' ? state.routineTemplates[sourceId] : null;
-        state.routineTemplates[id] = {
-          id, name,
-          exercises: source ? source.exercises.map(ex => ({...ex, completed: Array.from({length:ex.sets},()=>false)})) : [],
-          createdAt: new Date().toISOString()
-        };
-        state.activeRoutineId = id;
-        ensureRoutineSession(todayISO(), id);
-        persist(true);
-        renderEdit();
-        renderToday();
-        toast('Routine created');
-        return;
-      }
-      if(e.target.closest('[data-add-to-routine]')) {
-        const select = document.getElementById('addExerciseSelect');
-        const exId = select?.value;
-        if(!exId) return;
-        const routine = getRoutine(todayISO(), state.activeRoutineId);
-        if(routine.exercises.some(x => x.exerciseId === exId)) return toast('Exercise already in routine');
-        routine.exercises.push({ exerciseId: exId, sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] });
-        replaceActiveTemplateFromRoutine(routine);
-        persist(true);
-        renderEdit();
-        toast('Added to routine');
-        return;
-      }
-      const rem = e.target.closest('[data-remove-routine]');
-      if(rem) {
-        const idx = Number(rem.dataset.removeRoutine);
-        const routine = getRoutine(todayISO(), state.activeRoutineId);
-        routine.exercises.splice(idx, 1);
-        replaceActiveTemplateFromRoutine(routine);
-        persist(true);
-        renderEdit();
-        return;
-      }
     });
 
-    function onLibrarySearch(e) {
-      const input = e.target;
-      const start = input.selectionStart;
-      ui.search = input.value;
-      renderLibrary();
-      const next = document.getElementById('librarySearch');
-      if(next) {
-        next.focus();
-        try { next.setSelectionRange(start, start); } catch(err) {}
+    function onAddToRoutine() {
+      const select = document.getElementById('addExerciseSelect');
+      const exId = select.value;
+      const template = state.routineTemplates[state.activeRoutineId];
+      if(template.exercises.some(x => x.exerciseId === exId)) {
+        toast('Exercise already exists in this routine.', true);
+        return;
       }
+      template.exercises.push({ exerciseId: exId, sets: 3, reps: 10, holdDuration: 0, holdRep: null, completed: [false, false, false] });
+      persist(true);
+      toast('Added exercise to routine');
     }
 
-    function openModal(id) {
-      const ex = id ? state.exercises.find(x => x.id === id) : null;
+    function onLibrarySearch(e) {
+      ui.search = e.target.value;
+      renderLibrary();
+    }
+
+    function openModal(exerciseId) {
+      const ex = exerciseId ? state.exercises.find(x => x.id === exerciseId) : null;
+      ui.editingId = ex ? ex.id : null;
       const form = document.getElementById('exerciseModalForm');
       form.reset();
       document.getElementById('modalTitle').textContent = ex ? 'Edit Exercise' : 'Add Exercise';
@@ -1083,75 +798,119 @@ details.guide summary {
       form.elements.notes.value = ex?.drillDown?.notes || '';
       form.elements.tags.value = ex?.tags?.join(', ') || '';
       document.getElementById('modalBackdrop').classList.add('open');
+      document.getElementById('modalBackdrop').setAttribute('aria-hidden', 'false');
     }
 
     function closeModal() {
       document.getElementById('modalBackdrop').classList.remove('open');
+      document.getElementById('modalBackdrop').setAttribute('aria-hidden', 'true');
     }
 
     function onModalSubmit(e) {
       e.preventDefault();
       const form = e.target;
-      const idVal = form.elements.id.value;
-      const name = form.elements.name.value.trim();
-      if(!name) return toast('Name is required', true);
-
-      const ex = {
-        id: idVal || slugify(name),
-        name,
-        category: normalizeCategory(form.elements.category.value),
-        description: form.elements.description.value.trim(),
-        tags: form.elements.tags.value.split(',').map(s => s.trim()).filter(Boolean),
-        drillDown: {
-          whatToFeel: form.elements.whatToFeel.value.trim(),
-          technique: form.elements.technique.value.split('\n').map(s => s.trim()).filter(Boolean),
-          commonMistakes: form.elements.commonMistakes.value.split('\n').map(s => s.trim()).filter(Boolean),
-          progression: form.elements.progression.value.trim(),
-          notes: form.elements.notes.value.trim()
-        }
+      const data = new FormData(form);
+      const name = String(data.get('name') || '').trim();
+      const id = String(data.get('id') || '').trim() || slugify(name);
+      const category = normalizeCategory(data.get('category'));
+      const description = String(data.get('description') || '').trim();
+      const drillDown = {
+        whatToFeel: String(data.get('whatToFeel') || '').trim(),
+        technique: splitLines(data.get('technique')),
+        commonMistakes: splitLines(data.get('commonMistakes')),
+        progression: String(data.get('progression') || '').trim(),
+        notes: String(data.get('notes') || '').trim()
       };
+      const tags = String(data.get('tags') || '').split(',').map(s => s.trim()).filter(Boolean);
 
-      const existingIdx = state.exercises.findIndex(x => x.id === ex.id);
-      if(existingIdx >= 0) state.exercises[existingIdx] = ex;
+      if(!name) return toast('Name is required.', true);
+
+      const ex = { id, name, category, description, drillDown, tags };
+      const idx = state.exercises.findIndex(x => x.id === id);
+      if(idx >= 0) state.exercises[idx] = ex;
       else state.exercises.unshift(ex);
 
       persist(true);
       closeModal();
-      renderLibrary();
-      renderToday();
+      toast('Exercise saved');
+      if(document.getElementById('libraryManagerBackdrop').classList.contains('open')) renderLibraryManager();
+    }
+
+    function openLibraryManager() {
+      renderLibraryManager();
+      const backdrop = document.getElementById('libraryManagerBackdrop');
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLibraryManager() {
+      const backdrop = document.getElementById('libraryManagerBackdrop');
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+
+    function renderLibraryManager() {
+      const container = document.getElementById('libraryManagerList');
+      container.innerHTML = `
+        <div class="row" style="margin-bottom:12px;">
+          <button class="btn small" type="button" onclick="openModal()">+ Add New Exercise</button>
+        </div>
+        ${state.exercises.map(ex => `
+          <div class="exercise-card" style="margin-bottom:8px;">
+            <div class="row spaced">
+              <strong>${escapeHtml(ex.name)}</strong>
+              <div>
+                <button class="btn secondary small" type="button" onclick="openModal('${ex.id}')">Edit</button>
+                <button class="btn danger small" type="button" onclick="deleteLibraryExercise('${ex.id}')">Delete</button>
+              </div>
+            </div>
+            <div class="subtle" style="font-size:0.85rem">${escapeHtml(ex.category)}</div>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function deleteLibraryExercise(id) {
+      if(!confirm('Are you sure you want to delete this exercise from the library?')) return;
+      state.exercises = state.exercises.filter(x => x.id !== id);
+      Object.values(state.routineTemplates).forEach(t => {
+        t.exercises = t.exercises.filter(item => item.exerciseId !== id);
+      });
+      persist(true);
+      renderLibraryManager();
+      toast('Exercise deleted');
     }
 
     function exportCsv() {
-      let csv = 'Date,Routine,Exercise,Set,Completed\n';
+      const rows = [['Date', 'Routine', 'Exercise', 'Category', 'Sets', 'Reps', 'Hold Duration (sec)', 'Completed Sets', 'Status']];
       Object.values(state.routines).forEach(r => {
-        r.exercises.forEach(item => {
-          const ex = state.exercises.find(x => x.id === item.exerciseId);
-          const name = ex ? ex.name : item.exerciseId;
-          item.completed.forEach((done, sIdx) => {
-            csv += `"${r.date}","${r.routineName}","${name}",${sIdx + 1},${done}\n`;
-          });
+        (r.exercises || []).forEach(item => {
+          const ex = state.exercises.find(e => e.id === item.exerciseId) || {};
+          const done = (item.completed || []).filter(Boolean).length;
+          rows.push([r.date, r.routineName, ex.name || 'Unknown', ex.category || '', item.sets, item.reps, item.holdDuration || 0, `${done}/${item.sets}`, r.completionStatus]);
         });
       });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = `pt-tracker-log-${todayISO()}.csv`;
+      document.body.appendChild(a);
       a.click();
+      a.remove();
+      toast('CSV exported successfully');
     }
 
     function updateTabBadge() {
-      const today = getRoutine(todayISO());
-      const completed = (today.exercises || []).reduce((s, ex) => s + (ex.completed || []).filter(Boolean).length, 0);
-      const total = (today.exercises || []).reduce((s, ex) => s + (ex.sets || 0), 0);
+      const todayIso = todayISO();
+      const routine = getRoutine(todayIso, state.activeRoutineId);
+      const total = (routine.exercises || []).reduce((acc, ex) => acc + (ex.sets || 0), 0);
+      const completed = (routine.exercises || []).reduce((acc, ex) => acc + (ex.completed || []).filter(Boolean).length, 0);
       const btn = document.querySelector('.tab-btn[data-tab="today"]');
       if(btn) btn.textContent = total ? `Today (${completed}/${total})` : 'Today';
     }
 
-    function escapeHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
+    // Initial load render
     renderActive();
   </script>
 </body>
